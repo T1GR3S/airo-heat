@@ -1,2 +1,3 @@
 Authors:
-Silvia Nerea Anguita de Blas (@silvianerea)
+- Silvia Nerea Anguita de Blas (@silvianerea)
+- Ricardo José Ruiz Fernández (@ricardojoserf)
