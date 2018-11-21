@@ -1,1 +1,2 @@
 Authors:
+- Ricardo José Ruiz Fernández (@ricardojoserf)
