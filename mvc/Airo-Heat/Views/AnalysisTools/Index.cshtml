@@ -1,0 +1,87 @@
+@{
+   
+}
+<div class="wrapper">
+
+  <!-- Main Header -->
+  <header class="main-header">
+    
+    <!-- Logo -->
+    <a ng-click="page = 'dir_particles'" class="logo">
+      <span class="logo-lg"><b>Index</b></span>
+    </a>
+   
+    <!-- Header Navbar -->
+    <nav class="navbar navbar-static-top" role="navigation">
+      <a href="#" class="sidebar-toggle" data-toggle="push-menu" role="button">
+        <span class="sr-only">Toggle navigation</span>
+      </a>
+    </nav>
+
+  </header>
+  
+  <!-- Left side column. contains the logo and sidebar -->
+  <aside class="main-sidebar">
+    
+    <!-- sidebar: style can be found in sidebar.less -->
+    <section class="sidebar">
+      
+      <!-- Sidebar user panel (optional) -->
+      <div class="user-panel">
+
+        <div class="pull-left image">
+          <img src="visual/images/foto.jpg" class="img-circle" alt="User Image">
+        </div>
+      
+        <div class="pull-left info" >
+          <p>Cybercamp 2018</p>
+          <p><b>Airo-Heat</b></p>
+        </div>
+      
+      </div>
+
+      <!-- Sidebar Menu -->
+      <ul class="sidebar-menu" data-widget="tree">
+
+        <li class="header">Airo-Heat Project</li>
+        
+        <!--  Este no es tree, es uno normal - nos puede servir
+        <li><a ng-click="page = 'dir_cmd'"><i class="fa fa-terminal"></i> <span>Old - Command Line</span></a></li> -->
+        <li class="treeview menu-open">
+          <a href="/"><i class="fa fa-fire"></i> <span>Analysis Tools</span>
+            <span class="pull-right-container">
+                <i class="fa fa-angle-left pull-right"></i>
+              </span>
+          </a>
+          <ul class="treeview-menu">
+            <!-- <li><a ng-click="page = 'dir_instid'"><i class="fa fa-circle-o"></i> Get ID</a></li> -->
+            <li><a asp-controller="Home" asp-action="Statistics"><i class="fa fa-circle-o"></i> Statistics </a></li>
+            <li><a asp-controller="Home" asp-action="HeatMap"><i class="fa fa-circle-o"></i> HeatMap </a></li>
+            <li><a asp-controller="Home" asp-action="Enumeration"><i class="fa fa-circle-o"></i> Client Enumeration </a></li>
+          </ul>
+        </li>
+
+        <li class="header">CONTACT</li>
+        <li><a href="https://github.com/T1GR3S/airo-Heat" target="_blank"><i class="fa fa-github-alt"></i> <span>Github</span></a></li>
+
+      </ul>
+      <!-- /.sidebar-menu -->
+    </section>
+    <!-- /.sidebar -->
+  </aside>
+
+  <!-- Content Wrapper. Contains page content -->
+  <div class="content-wrapper">
+    <!-- Content Header (Page header) -->
+    
+    <section class="content-fluid">
+      <h2>@ViewData["Title"]</h2>
+      <h3>@ViewData["Message"]</h3>
+      <ng-include src="'html/'+ page +'.html'"></ng-include>
+    </section>
+
+  </div>
+
+</div>
+<!-- ./wrapper -->
+

@@ -1,0 +1,10 @@
+/home/mimi/Documentos/Airo-Heat/bin/Debug/netcoreapp2.0/Airo-Heat.deps.json
+/home/mimi/Documentos/Airo-Heat/bin/Debug/netcoreapp2.0/Airo-Heat.runtimeconfig.json
+/home/mimi/Documentos/Airo-Heat/bin/Debug/netcoreapp2.0/Airo-Heat.runtimeconfig.dev.json
+/home/mimi/Documentos/Airo-Heat/bin/Debug/netcoreapp2.0/Airo-Heat.dll
+/home/mimi/Documentos/Airo-Heat/bin/Debug/netcoreapp2.0/Airo-Heat.pdb
+/home/mimi/Documentos/Airo-Heat/obj/Debug/netcoreapp2.0/Airo-Heat.csproj.CoreCompileInputs.cache
+/home/mimi/Documentos/Airo-Heat/obj/Debug/netcoreapp2.0/Airo-Heat.AssemblyInfoInputs.cache
+/home/mimi/Documentos/Airo-Heat/obj/Debug/netcoreapp2.0/Airo-Heat.AssemblyInfo.cs
+/home/mimi/Documentos/Airo-Heat/obj/Debug/netcoreapp2.0/Airo-Heat.dll
+/home/mimi/Documentos/Airo-Heat/obj/Debug/netcoreapp2.0/Airo-Heat.pdb
