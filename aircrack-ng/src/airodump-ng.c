@@ -40,6 +40,8 @@
 #include <sys/wait.h>
 #include <sys/time.h>
 
+#include <sqlite3.h>
+
 #ifndef TIOCGWINSZ
 #include <sys/termios.h>
 #endif
@@ -142,6 +144,30 @@ static char * get_manufacturer_from_string(char * buffer)
 	}
 
 	return manuf;
+}
+
+
+ static int createDB(void){
+	char *sql = "CREATE TABLE AP(  bssid TEXT NOT NULL,  manuf TEXT,  lat REAL,  lon REAL,  CONSTRAINT Key1 PRIMARY KEY (bssid));"
+	"CREATE TABLE Client(  mac TEXT NOT NULL,  manuf TEXT,  type TEXT,  CONSTRAINT Key1 PRIMARY KEY (mac));"
+	"CREATE TABLE SeenClient(  mac TEXT NOT NULL,  time datetime NOT NULL,  channel int,  maxseenrate REAL,  carrier TEXT,  encoding TEXT,  packetsLLC int,  packetsData int,  packetsCrypt int,  packetsTotal int,  packetsFragments int,  packetsRetries int,  signal_dbm int,  noise_dbm int,  signal_rssi int,  noise_rssi int,  lat REAL,  lon REAL,  alt REAL,  spd REAL,  CONSTRAINT Key3 PRIMARY KEY (time,mac),  CONSTRAINT Seen FOREIGN KEY (mac) REFERENCES Client (mac));"
+	"CREATE TABLE Connected(  bssid TEXT NOT NULL,  mac TEXT NOT NULL,  CONSTRAINT Key4 PRIMARY KEY (bssid,mac),  CONSTRAINT Relationship2 FOREIGN KEY (bssid) REFERENCES AP (bssid),  CONSTRAINT Relationship3 FOREIGN KEY (mac) REFERENCES Client (mac));"
+	"CREATE TABLE SeenAp(  bssid TEXT NOT NULL,  essid TEXT,  time datetime NOT NULL,  channel int,  freqmhz TEXT,  maxseenrate REAL,  carrier TEXT,  encoding TEXT,  packetsLLC int,  packetsData int,  packetsCrypt int,  packetsTotal int,  packetsFragments int,  packetsRetries int,  signal_dbm int,  noise_dbm int,  signal_rssi int,  noise_rssi int,  lat REAL,  lon REAL,  alt REAL,  spd REAL,  bsstimestamp timestamp,  cdp_device TEXT,  cdp_portid TEXT,  CONSTRAINT Key3 PRIMARY KEY (time,bssid),  CONSTRAINT SeenAp FOREIGN KEY (bssid) REFERENCES AP (bssid));"
+	"CREATE TABLE Probe(  mac TEXT NOT NULL,  ssid TEXT NOT NULL,  max_rate REAL,  packets int,  CONSTRAINT Key5 PRIMARY KEY (mac,ssid),  CONSTRAINT Relationship6 FOREIGN KEY (mac) REFERENCES Client (mac));";
+
+	char *err_msg = 0;
+    int rc = sqlite3_exec(G.db, sql, 0, 0, &err_msg);
+    
+    if (rc != SQLITE_OK ) {
+        
+        fprintf(stderr, "SQL error: %s\n", err_msg);
+        
+        sqlite3_free(err_msg);        
+        sqlite3_close(G.db);
+        
+        return 1;
+    } 
+	return 0;
 }
 
 static void resetSelection(void)
@@ -1035,6 +1061,31 @@ static int dump_initialize(char * prefix, int ivs_only)
 			free(ofn);
 			return (1);
 		}
+	}
+
+	/* Create the output sqlite file */
+
+	if (G.output_format_kismet_netxml) //hay que cambiarlo!!!!!!!!
+	{
+		char *zErrMsg = 0;
+		char *sql;
+		int sqlite_con;
+		//name database
+		memset(ofn, 0, ofn_len);
+		snprintf(
+			ofn, ofn_len, "%s-%02d.%s", prefix, G.f_index, SQLITE_EXT);
+		
+		/* Open database */
+		sqlite_con = sqlite3_open(ofn, &G.db);
+		
+		if( sqlite_con ) {
+			fprintf(stderr, "Can't open database: %s\n", sqlite3_errmsg(G.db));
+			return(0);
+		} else {
+			fprintf(stdout, "Opened database successfully\n");
+		}
+
+		createDB();
 	}
 
 	/* create the output packet capture file */
@@ -4380,8 +4431,382 @@ static char * format_text_for_csv(const unsigned char * input, int len)
 	return (rret) ? rret : ret;
 }
 
+//////////////////////////////////////////////////////////////////////////////////////////////
+
+static char * sanitize_xml(unsigned char * text, int length)
+{
+	int i;
+	size_t len, current_text_len;
+	unsigned char * pos;
+	char * newtext = NULL;
+	if (text != NULL && length > 0)
+	{
+		len = 8 * length;
+		newtext = (char *) calloc(
+			1, (len + 1) * sizeof(char)); // Make sure we have enough space
+		pos = text;
+		for (i = 0; i < length; ++i, ++pos)
+		{
+			switch (*pos)
+			{
+				case '&':
+					strncat(newtext, "&amp;", len);
+					break;
+				case '<':
+					strncat(newtext, "&lt;", len);
+					break;
+				case '>':
+					strncat(newtext, "&gt;", len);
+					break;
+				case '\'':
+					strncat(newtext, "&apos;", len);
+					break;
+				case '"':
+					strncat(newtext, "&quot;", len);
+					break;
+				case '\r':
+					strncat(newtext, "&#xD;", len);
+					break;
+				case '\n':
+					strncat(newtext, "&#xA;", len);
+					break;
+				default:
+					if (isprint((int) (*pos)))
+					{
+						newtext[strlen(newtext)] = *pos;
+					}
+					else
+					{
+						strncat(newtext, "&#x", len);
+						current_text_len = strlen(newtext);
+						snprintf(newtext + current_text_len,
+								 len - current_text_len + 1,
+								 "%4x",
+								 *pos);
+						strncat(newtext, ";", len);
+					}
+					break;
+			}
+		}
+		newtext = (char *) realloc(newtext, strlen(newtext) + 1);
+	}
+
+	return newtext;
+}
+
+
+static int dump_sqlite(void){
+
+	int i, n, probes_written;
+	struct tm * ltime;
+	struct AP_info * ap_cur;
+	struct ST_info * st_cur;
+	char * temp;
+	char * manuf;
+
+	if (!G.record_data || !G.output_format_csv) return 0;
+
+	fseek(G.f_txt, 0, SEEK_SET);
+
+	ap_cur = G.ap_end;
+
+	while (ap_cur != NULL)
+	{
+		/* skip APs with only one packet, or those older than 2 min.
+		* always skip if bssid == broadcast */
+
+		if (ap_cur->nb_pkt < 2 || time(NULL) - ap_cur->tlast > G.berlin
+			|| memcmp(ap_cur->bssid, BROADCAST, 6) == 0)
+		{
+			ap_cur = ap_cur->prev;
+			continue;
+		}
+		
+		if (memcmp(ap_cur->bssid, BROADCAST, 6) == 0)
+		{
+			ap_cur = ap_cur->prev;
+			continue;
+		}
+
+		if (ap_cur->security != 0 && G.f_encrypt != 0
+			&& ((ap_cur->security & G.f_encrypt) == 0))
+		{
+			ap_cur = ap_cur->prev;
+			continue;
+		}
+
+		if (is_filtered_essid(ap_cur->essid))
+		{
+			ap_cur = ap_cur->prev;
+			continue;
+		}
+
+		char mac[200];
+		sprintf(mac,
+				"%02X:%02X:%02X:%02X:%02X:%02X",
+				ap_cur->bssid[0],
+				ap_cur->bssid[1],
+				ap_cur->bssid[2],
+				ap_cur->bssid[3],
+				ap_cur->bssid[4],
+				ap_cur->bssid[5]);
+
+		/* Manufacturer, if set using standard oui list */
+		manuf = sanitize_xml((unsigned char *) ap_cur->manuf,
+							 strlen(ap_cur->manuf));
+
+
+		char sql[200];
+		sprintf(sql, "INSERT INTO AP VALUES('%s', '%s', 0, 0);", mac, manuf);
+		
+		char *err_msg = 0;
+		char rc = sqlite3_exec(G.db, sql, 0, 0, &err_msg);
+		
+		/*if (rc != SQLITE_OK ) {
+			
+			fprintf(stderr, "SQL error: %s\n", err_msg);
+			
+			sqlite3_free(err_msg);        
+			sqlite3_close(G.db);
+			
+		}*/ 
+
+		//essid, time, lat, lon 
+		char essid[200];
+		if (verifyssid(ap_cur->essid))
+			sprintf(essid, "%s", ap_cur->essid);
+		else
+		{
+			temp = format_text_for_csv(ap_cur->essid, ap_cur->ssid_length);
+			sprintf(essid, "%s", temp);
+			free(temp);
+		}
+		
+
+		char time[200];
+		ltime = localtime(&ap_cur->tlast);
+		sprintf(time,
+				"%04d-%02d-%02d %02d:%02d:%02d",
+				1900 + ltime->tm_year,
+				1 + ltime->tm_mon,
+				ltime->tm_mday,
+				ltime->tm_hour,
+				ltime->tm_min,
+				ltime->tm_sec);
+
+		char lat[200];
+		char lon[200];
+		sprintf(lat,
+				 "%8.3f", //ccomproar variable
+				 G.gps_loc[0]);
+		sprintf(lon,
+				 "%8.3f",
+				 G.gps_loc[2] //Comprobar variable
+				 );
+
+		sprintf(sql, "INSERT INTO SeenAP VALUES('%s', '%s', '%s', 1, 1, '', 1,'','',1,1,1,1,1,1,1,1,1,%s,%s,1,1,1,'','');", mac, essid, time, lat, lon);
+		
+		rc = sqlite3_exec(G.db, sql, 0, 0, &err_msg);
+
+		/*
+		ltime = localtime(&ap_cur->tlast);
+
+
+		fprintf(G.f_txt, "%2d, %3d,", ap_cur->channel, ap_cur->max_speed);
+
+		if ((ap_cur->security & (STD_OPN | STD_WEP | STD_WPA | STD_WPA2)) == 0)
+			fprintf(G.f_txt, " ");
+		else
+		{
+			if (ap_cur->security & STD_WPA2) fprintf(G.f_txt, " WPA2");
+			if (ap_cur->security & STD_WPA) fprintf(G.f_txt, " WPA");
+			if (ap_cur->security & STD_WEP) fprintf(G.f_txt, " WEP");
+			if (ap_cur->security & STD_OPN) fprintf(G.f_txt, " OPN");
+		}
+
+		fprintf(G.f_txt, ",");
+
+		if ((ap_cur->security
+			 & (ENC_WEP | ENC_TKIP | ENC_WRAP | ENC_CCMP | ENC_WEP104
+				| ENC_WEP40
+				| ENC_GCMP))
+			== 0)
+			fprintf(G.f_txt, " ");
+		else
+		{
+			if (ap_cur->security & ENC_CCMP) fprintf(G.f_txt, " CCMP");
+			if (ap_cur->security & ENC_WRAP) fprintf(G.f_txt, " WRAP");
+			if (ap_cur->security & ENC_TKIP) fprintf(G.f_txt, " TKIP");
+			if (ap_cur->security & ENC_WEP104) fprintf(G.f_txt, " WEP104");
+			if (ap_cur->security & ENC_WEP40) fprintf(G.f_txt, " WEP40");
+			if (ap_cur->security & ENC_WEP) fprintf(G.f_txt, " WEP");
+			if (ap_cur->security & ENC_WEP) fprintf(G.f_txt, " GCMP");
+		}
+
+		fprintf(G.f_txt, ",");
+
+		if ((ap_cur->security & (AUTH_OPN | AUTH_PSK | AUTH_MGT)) == 0)
+			fprintf(G.f_txt, "   ");
+		else
+		{
+			if (ap_cur->security & AUTH_MGT) fprintf(G.f_txt, " MGT");
+			if (ap_cur->security & AUTH_PSK)
+			{
+				if (ap_cur->security & STD_WEP)
+					fprintf(G.f_txt, " SKA");
+				else
+					fprintf(G.f_txt, " PSK");
+			}
+			if (ap_cur->security & AUTH_OPN) fprintf(G.f_txt, " OPN");
+		}
+
+		fprintf(G.f_txt,
+				", %3d, %8lu, %8lu, ",
+				ap_cur->avg_power,
+				ap_cur->nb_bcn,
+				ap_cur->nb_data);
+
+		fprintf(G.f_txt,
+				"%3d.%3d.%3d.%3d, ",
+				ap_cur->lanip[0],
+				ap_cur->lanip[1],
+				ap_cur->lanip[2],
+				ap_cur->lanip[3]);
+
+		fprintf(G.f_txt, "%3d, ", ap_cur->ssid_length);
+
+		if (verifyssid(ap_cur->essid))
+			fprintf(G.f_txt, "%s, ", ap_cur->essid);
+		else
+		{
+			temp = format_text_for_csv(ap_cur->essid, ap_cur->ssid_length);
+			fprintf(G.f_txt, "%s, ", temp);
+			free(temp);
+		}
+
+		if (ap_cur->key != NULL)
+		{
+			for (i = 0; i < (int) strlen(ap_cur->key); i++)
+			{
+				fprintf(G.f_txt, "%02X", ap_cur->key[i]);
+				if (i < (int) (strlen(ap_cur->key) - 1)) fprintf(G.f_txt, ":");
+			}
+		}
+
+		fprintf(G.f_txt, "\r\n");
+		*/
+		ap_cur = ap_cur->prev;
+	}
+
+	fprintf(G.f_txt,
+			"\r\nStation MAC, First time seen, Last time seen, "
+			"Power, # packets, BSSID, Probed ESSIDs\r\n");
+
+	st_cur = G.st_1st;
+
+	while (st_cur != NULL)
+	{
+		ap_cur = st_cur->base;
+
+		if (ap_cur->nb_pkt < 2)
+		{
+			st_cur = st_cur->next;
+			continue;
+		}
+
+		fprintf(G.f_txt,
+				"%02X:%02X:%02X:%02X:%02X:%02X, ",
+				st_cur->stmac[0],
+				st_cur->stmac[1],
+				st_cur->stmac[2],
+				st_cur->stmac[3],
+				st_cur->stmac[4],
+				st_cur->stmac[5]);
+
+		ltime = localtime(&st_cur->tinit);
+
+		fprintf(G.f_txt,
+				"%04d-%02d-%02d %02d:%02d:%02d, ",
+				1900 + ltime->tm_year,
+				1 + ltime->tm_mon,
+				ltime->tm_mday,
+				ltime->tm_hour,
+				ltime->tm_min,
+				ltime->tm_sec);
+
+		ltime = localtime(&st_cur->tlast);
+
+		fprintf(G.f_txt,
+				"%04d-%02d-%02d %02d:%02d:%02d, ",
+				1900 + ltime->tm_year,
+				1 + ltime->tm_mon,
+				ltime->tm_mday,
+				ltime->tm_hour,
+				ltime->tm_min,
+				ltime->tm_sec);
+
+		fprintf(G.f_txt, "%3d, %8lu, ", st_cur->power, st_cur->nb_pkt);
+
+		if (!memcmp(ap_cur->bssid, BROADCAST, 6))
+			fprintf(G.f_txt, "(not associated) ,");
+		else
+			fprintf(G.f_txt,
+					"%02X:%02X:%02X:%02X:%02X:%02X,",
+					ap_cur->bssid[0],
+					ap_cur->bssid[1],
+					ap_cur->bssid[2],
+					ap_cur->bssid[3],
+					ap_cur->bssid[4],
+					ap_cur->bssid[5]);
+
+		probes_written = 0;
+		for (i = 0, n = 0; i < NB_PRB; i++)
+		{
+			if (st_cur->ssid_length[i] == 0) continue;
+
+			if (verifyssid((const unsigned char *) st_cur->probes[i]))
+			{
+				temp = (char *) calloc(
+					1, (st_cur->ssid_length[i] + 1) * sizeof(char));
+				memcpy(temp, st_cur->probes[i], st_cur->ssid_length[i] + 1);
+			}
+			else
+			{
+				temp = format_text_for_csv((unsigned char *) st_cur->probes[i],
+										   st_cur->ssid_length[i]);
+			}
+
+			if (probes_written == 0)
+			{
+				fprintf(G.f_txt, "%s", temp);
+				probes_written = 1;
+			}
+			else
+			{
+				fprintf(G.f_txt, ",%s", temp);
+			}
+
+			free(temp);
+		}
+
+		fprintf(G.f_txt, "\r\n");
+
+		st_cur = st_cur->next;
+	}
+
+	fprintf(G.f_txt, "\r\n");
+	fflush(G.f_txt);
+	return 0;
+	
+}
+
+
+/////////////////////////////////////////////////////////////////////////////////////////////
+
+
 static int dump_write_csv(void)
 {
+	dump_sqlite(); //borarrr!!!!!
 	int i, n, probes_written;
 	struct tm * ltime;
 	struct AP_info * ap_cur;
@@ -4419,6 +4844,8 @@ static int dump_write_csv(void)
 			ap_cur = ap_cur->next;
 			continue;
 		}
+
+	
 
 		fprintf(G.f_txt,
 				"%02X:%02X:%02X:%02X:%02X:%02X, ",
@@ -4636,67 +5063,6 @@ static int dump_write_csv(void)
 	fprintf(G.f_txt, "\r\n");
 	fflush(G.f_txt);
 	return 0;
-}
-
-static char * sanitize_xml(unsigned char * text, int length)
-{
-	int i;
-	size_t len, current_text_len;
-	unsigned char * pos;
-	char * newtext = NULL;
-	if (text != NULL && length > 0)
-	{
-		len = 8 * length;
-		newtext = (char *) calloc(
-			1, (len + 1) * sizeof(char)); // Make sure we have enough space
-		pos = text;
-		for (i = 0; i < length; ++i, ++pos)
-		{
-			switch (*pos)
-			{
-				case '&':
-					strncat(newtext, "&amp;", len);
-					break;
-				case '<':
-					strncat(newtext, "&lt;", len);
-					break;
-				case '>':
-					strncat(newtext, "&gt;", len);
-					break;
-				case '\'':
-					strncat(newtext, "&apos;", len);
-					break;
-				case '"':
-					strncat(newtext, "&quot;", len);
-					break;
-				case '\r':
-					strncat(newtext, "&#xD;", len);
-					break;
-				case '\n':
-					strncat(newtext, "&#xA;", len);
-					break;
-				default:
-					if (isprint((int) (*pos)))
-					{
-						newtext[strlen(newtext)] = *pos;
-					}
-					else
-					{
-						strncat(newtext, "&#x", len);
-						current_text_len = strlen(newtext);
-						snprintf(newtext + current_text_len,
-								 len - current_text_len + 1,
-								 "%4x",
-								 *pos);
-						strncat(newtext, ";", len);
-					}
-					break;
-			}
-		}
-		newtext = (char *) realloc(newtext, strlen(newtext) + 1);
-	}
-
-	return newtext;
 }
 
 #define OUI_STR_SIZE 8
@@ -5486,6 +5852,7 @@ static int dump_write_kismet_netxml(void)
 	"FirstTime;LastTime;BestQuality;BestSignal;BestNoise;GPSMinLat;GPSMinLon;" \
 	"GPSMinAlt;GPSMinSpd;GPSMaxLat;GPSMaxLon;GPSMaxAlt;GPSMaxSpd;GPSBestLat;"  \
 	"GPSBestLon;GPSBestAlt;DataSize;IPType;IP;\n"
+
 
 static int dump_write_kismet_csv(void)
 {
