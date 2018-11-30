@@ -105,7 +105,6 @@ get_manufacturer(unsigned char mac0, unsigned char mac1, unsigned char mac2);
 #define AIRODUMP_NG_CSV_EXT "csv"
 #define KISMET_CSV_EXT "kismet.csv"
 #define KISMET_NETXML_EXT "kismet.netxml"
-#define SQLITE_EXT "db"
 #define AIRODUMP_NG_GPS_EXT "gps"
 #define AIRODUMP_NG_CAP_EXT "cap"
 
@@ -378,13 +377,14 @@ struct globals
 
 	int f_index; /* outfiles index       */
 	FILE * f_txt; /* output csv file      */
+	FILE * f_aptxt; /* output ap csv file      */
+	FILE * f_clitxt; /* output client csv file      */
 	FILE * f_kis; /* output kismet csv file      */
 	FILE * f_kis_xml; /* output kismet netxml file */
 	FILE * f_gps; /* output gps file      */
 	FILE * f_cap; /* output cap file      */
 	FILE * f_ivs; /* output ivs file      */
 	FILE * f_xor; /* output prga file     */
-	sqlite3 *db;
 
 	char * batt; /* Battery string       */
 	int channel[MAX_CARDS]; /* current channel #    */
@@ -486,9 +486,10 @@ struct globals
 
 	int output_format_pcap;
 	int output_format_csv;
+	int output_format_seen_ap;
+	int output_format_seen_cli;
 	int output_format_kismet_csv;
 	int output_format_kismet_netxml;
-	int output_format_sqlite;
 	pthread_t input_tid;
 	int sort_by;
 	int sort_inv;
