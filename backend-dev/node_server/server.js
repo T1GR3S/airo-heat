@@ -28,9 +28,26 @@ app.get('/table', function(req, res){
     });
 });
 
+
+app.get('/table_clients', function(req, res){
+    db.all("SELECT mac,manuf,type FROM Client", function(err, row){
+        //console.log(row);
+        res.render('html/table_clients.html', {row:row});
+    });
+});
+
+app.get('/table_ap', function(req, res){
+	var networkName = ' Cybercamp2018';
+    db.all("SELECT essid,bssid,signal_rssi FROM SeenAP where essid='"+networkName+"' GROUP BY bssid", function(err, row){
+        //console.log(row);
+        res.render('html/table_ap.html', {row:row, name:networkName});
+    });
+});
+
+
 app.get('*', function(req, res) {  
     res.sendfile('html/index.html');
 });
 
 app.listen(config.web.port);
-console.log("Visit http://localhost:3000/data");
+console.log("Visit http://localhost:3000");
