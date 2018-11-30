@@ -2,6 +2,8 @@
 Based on: http://bl.ocks.org/awoodruff/0883d211538ed05a82fd1b82bd65bf34
 -->
 
+
+
 <!DOCTYPE html>
 <html>
 <head>
@@ -12,10 +14,55 @@ Based on: http://bl.ocks.org/awoodruff/0883d211538ed05a82fd1b82bd65bf34
     <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet/v0.7.7/leaflet.css" />
     <script src="http://cdn.leafletjs.com/leaflet/v0.7.7/leaflet.js"></script>
     <link rel="stylesheet" type="text/css" href="heatmap/style.css">
-</head>
-<body>
 
-<div class="container">
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<title>Cybercamp 2018</title>
+	<meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+	<link rel="stylesheet" href="visual/adminlte/bower_components/bootstrap/dist/css/bootstrap.min.css">
+	<link rel="stylesheet" href="visual/adminlte/bower_components/font-awesome/css/font-awesome.min.css">
+	<link rel="stylesheet" href="visual/adminlte/bower_components/Ionicons/css/ionicons.min.css">
+	<link rel="stylesheet" href="visual/adminlte/dist/css/AdminLTE.min.css">
+	<link rel="stylesheet" href="visual/adminlte/dist/css/skins/skin-blue.min.css">
+	<link rel="stylesheet"
+	    href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,700,300italic,400italic,600italic">
+	<link rel="shortcut icon" href="visual/icons/favicon.ico" type="image/x-icon">
+	<link rel="icon" href="visual/icons/favicon.ico" type="image/x-icon">
+</head>
+<body class="hold-transition skin-blue sidebar-mini">
+<div class="wrapper">
+  <header class="main-header">
+    <a href="/" class="logo">
+      <span class="logo-lg"><b>Index</b></span>
+    </a>
+    <nav class="navbar navbar-static-top" role="navigation">
+      <a href="#" class="sidebar-toggle" data-toggle="push-menu" role="button">
+        <span class="sr-only">Toggle navigation</span>
+      </a>
+    </nav>
+  </header>
+  <aside class="main-sidebar">
+    <section class="sidebar">
+      <div class="user-panel">
+        <div class="pull-left image">
+          <img src="visual/images/foto.jpg" class="img-circle" alt="User Image">
+        </div>
+        <div class="pull-left info" >
+          <p>Airo-Heat</p>
+          <p><b>Cybercamp 2018</b></p>
+        </div>
+      </div>
+      <ul class="sidebar-menu" data-widget="tree">
+        <li class="header">Functionalities</li>
+        <li><a href="/data"><i class="fa fa-fire"></i> <span>Heatmap test</span></a></li>        
+        <li><a href="/table"><i class="fa fa-table"></i> <span>Table test</span></a></li>        
+        <li class="header">Contact</li>
+        <li><a href="https://github.com/T1GR3S/airo-Heat" target="_blank"><i class="fa fa-github-alt"></i> <span>Github</span></a></li>
+      </ul>
+    </section>
+  </aside>
+  <div class="content-wrapper">
+    <div class="container">
 	<h2>Mapa de calor</h2>
 	<br>
 	
@@ -63,7 +110,7 @@ Based on: http://bl.ocks.org/awoodruff/0883d211538ed05a82fd1b82bd65bf34
 	document.getElementById("start_point").innerHTML = firstPoint.toString(); 
 	document.getElementById("end_point").innerHTML = lastPoint.toString(); 
 	
-    var map = L.map('map').setView(firstPoint, 18);
+    var map = L.map('map').setView(lastPoint, 18);
     var tiles = L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
         attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors',
         maxZoom: 20,
@@ -95,5 +142,15 @@ Based on: http://bl.ocks.org/awoodruff/0883d211538ed05a82fd1b82bd65bf34
     }).addTo(map);
 
 </script>
+
+  </div>
+</div>
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script> 
+<script src="visual/adminlte/bower_components/jquery/dist/jquery.min.js"></script>
+<script src="visual/adminlte/bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
+<script src="visual/adminlte/dist/js/adminlte.min.js"></script>
+
+
 </body>
 </html>

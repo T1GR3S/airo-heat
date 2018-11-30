@@ -15,14 +15,14 @@ app.set('views', __dirname);
 
 
 app.get('/data', function(req, res){
-    db.all("SELECT lat,lon,signal_rssi FROM SeenAP", function(err, row){
+    db.all("SELECT lat,lon,signal_rssi FROM SeenAP where essid=' Cybercamp2018'", function(err, row){
         //console.log(row);
         res.render('heatmap/test.html', {row:row});
     });
 });
 
 app.get('/table', function(req, res){
-    db.all("SELECT lat,lon,signal_rssi FROM SeenAP", function(err, row){
+    db.all("SELECT lat,lon,signal_rssi FROM SeenAP where essid=' Cybercamp2018'", function(err, row){
         //console.log(row);
         res.render('html/tables.html', {row:row});
     });
