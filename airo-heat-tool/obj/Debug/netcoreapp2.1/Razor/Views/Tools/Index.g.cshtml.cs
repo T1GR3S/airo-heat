@@ -90,7 +90,7 @@ using airo_heat_tool.Models;
           ");
             EndContext();
             BeginContext(800, 72, false);
-            __tagHelperExecutionContext = __tagHelperScopeManager.Begin("img", global::Microsoft.AspNetCore.Razor.TagHelpers.TagMode.StartTagOnly, "00f22ec25cb2412aa3fbc3f68cc21153", async() => {
+            __tagHelperExecutionContext = __tagHelperScopeManager.Begin("img", global::Microsoft.AspNetCore.Razor.TagHelpers.TagMode.StartTagOnly, "b3a353bc3f5f43538682243082caaa9e", async() => {
             }
             );
             __Microsoft_AspNetCore_Mvc_Razor_TagHelpers_UrlResolutionTagHelper = CreateTagHelper<global::Microsoft.AspNetCore.Mvc.Razor.TagHelpers.UrlResolutionTagHelper>();
@@ -135,7 +135,7 @@ using airo_heat_tool.Models;
             <li>");
             EndContext();
             BeginContext(1778, 95, false);
-            __tagHelperExecutionContext = __tagHelperScopeManager.Begin("a", global::Microsoft.AspNetCore.Razor.TagHelpers.TagMode.StartTagAndEndTag, "61731d147dea42838094a7f80587c429", async() => {
+            __tagHelperExecutionContext = __tagHelperScopeManager.Begin("a", global::Microsoft.AspNetCore.Razor.TagHelpers.TagMode.StartTagAndEndTag, "5308cb64ee384840804a65a807c26308", async() => {
                 BeginContext(1827, 42, true);
                 WriteLiteral("<i class=\"fa fa-circle-o\"></i> Statistics ");
                 EndContext();
@@ -159,7 +159,7 @@ using airo_heat_tool.Models;
             WriteLiteral("</li>\n            <li>");
             EndContext();
             BeginContext(1895, 89, false);
-            __tagHelperExecutionContext = __tagHelperScopeManager.Begin("a", global::Microsoft.AspNetCore.Razor.TagHelpers.TagMode.StartTagAndEndTag, "afdbbc5cd2ec4bb58a43423843968816", async() => {
+            __tagHelperExecutionContext = __tagHelperScopeManager.Begin("a", global::Microsoft.AspNetCore.Razor.TagHelpers.TagMode.StartTagAndEndTag, "7babfdbac8a8463db3927f172ce4b309", async() => {
                 BeginContext(1941, 39, true);
                 WriteLiteral("<i class=\"fa fa-circle-o\"></i> HeatMap ");
                 EndContext();
@@ -183,7 +183,7 @@ using airo_heat_tool.Models;
             WriteLiteral("</li>\n            <li>");
             EndContext();
             BeginContext(2006, 104, false);
-            __tagHelperExecutionContext = __tagHelperScopeManager.Begin("a", global::Microsoft.AspNetCore.Razor.TagHelpers.TagMode.StartTagAndEndTag, "06406410e0924c79be14a865f7c2d0e9", async() => {
+            __tagHelperExecutionContext = __tagHelperScopeManager.Begin("a", global::Microsoft.AspNetCore.Razor.TagHelpers.TagMode.StartTagAndEndTag, "02366d844c734a1094c9688c84d75652", async() => {
                 BeginContext(2056, 50, true);
                 WriteLiteral("<i class=\"fa fa-circle-o\"></i> Client Enumeration ");
                 EndContext();

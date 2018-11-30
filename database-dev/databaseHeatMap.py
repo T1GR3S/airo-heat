@@ -2,19 +2,27 @@ import xml.etree.ElementTree
 import sqlite3
 import sys
 
-db = sqlite3.connect(sys.argv[1])
-# Get a cursor object
-cursor = db.cursor()
+if sys.argv[1] == "-h" or sys.argv[1] =="--help":
+    print '''
+    Usage: databaseHeatMap.py <outputDB> <inputKismet>
+    \t outputDB: Database de salida SQLite3
+    \t inputAP: Fichero de kismet con los ap  y gps (formato .gpsxml)
+    '''
+    sys.exit(0)
 
 
 if len(sys.argv) < 3:
     print 'databaseHeatMap.py <outputDB> <inputKismet>'
     sys.exit(2)
 
+db = sqlite3.connect(sys.argv[1])
+# Get a cursor object
+cursor = db.cursor()
+
 try:
     cursor.execute('''
 
-CREATE TABLE AP
+CREATE TABLE IF NOT EXISTS AP
 (
   bssid TEXT NOT NULL,
   manuf TEXT,
@@ -25,7 +33,7 @@ CREATE TABLE AP
 ''')
 
     cursor.execute('''
-CREATE TABLE SeenAp
+CREATE TABLE IF NOT EXISTS SeenAp
 (
   bssid TEXT NOT NULL,
   essid TEXT,
@@ -57,7 +65,7 @@ CREATE TABLE SeenAp
 );
 ''')
     cursor.execute('''
-	CREATE TABLE Client
+	CREATE TABLE IF NOT EXISTS Client
 (
   mac TEXT NOT NULL,
   manuf TEXT,
@@ -66,7 +74,7 @@ CREATE TABLE SeenAp
 )
 	''')
     cursor.execute('''
-	CREATE TABLE SeenClient
+	CREATE TABLE IF NOT EXISTS SeenClient
 (
   mac TEXT NOT NULL,
   time datetime NOT NULL,
@@ -93,7 +101,7 @@ CREATE TABLE SeenAp
 );
 	''')
     cursor.execute('''
-	CREATE TABLE Connected
+	CREATE TABLE IF NOT EXISTS Connected
 (
   bssid TEXT NOT NULL,
   mac TEXT NOT NULL,
@@ -103,7 +111,7 @@ CREATE TABLE SeenAp
 );
 	''')
     cursor.execute('''
-	CREATE TABLE Probe
+	CREATE TABLE IF NOT EXISTS Probe
 (
   mac TEXT NOT NULL,
   ssid TEXT NOT NULL,
@@ -113,7 +121,7 @@ CREATE TABLE SeenAp
   CONSTRAINT Relationship6 FOREIGN KEY (mac) REFERENCES Client (mac)
 );
 	''')
-except sqlite3.IntegrityError:
+except:
     print('Record already exists')
 db.commit()
 
@@ -128,6 +136,7 @@ for atype in e.findall('gps-point'):
     lat = atype.get('lat')
     lon = atype.get('lon')
     signal_dbm = atype.get('signal_dbm')
+    #eliminamos mac error y mac falsa de kismet
     if bssid != "00:00:00:00:00:00" and bssid != "GP:SD:TR:AC:KL:OG":
         print(bssid)
         try:

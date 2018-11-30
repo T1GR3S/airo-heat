@@ -78,18 +78,95 @@
     <section class="content-fluid">
       <h2>@ViewData["Title"]</h2>
       <h3>@ViewData["Message"]</h3>
-      <h4>Acccespoints</h4>
-
-        @foreach(AccessPoint AP in Model.seenAPs){
-          <p>@AP.bssid</p>
-        }
-            
-
+      
+      <div class="container">
+	    
+        <h2>Mapa de calor</h2>
+        <br>
+        <script src="visual/heatmap/leaflet-heat.js"></script>
+        <div id="map"></div>
+        <script src="visual/heatmap/leaflet-heat.js"></script>
+        
+        <table class="table table-hover">
+        <thead>
+          <tr>
+            <th>Total of points</th>
+            <th>Start Point</th>
+            <th>End point</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td id="total_points">0</td>
+            <td id="start_point">0</td>
+            <td id="end_point">0</td>
+          </tr>
+        </tbody>
+        </table>
+      </div>
       <ng-include src="'html/'+ page +'.html'"></ng-include>
     </section>
 
   </div>
 
+
 </div>
 <!-- ./wrapper -->
+
+<script src="//cdn.rawgit.com/Leaflet/Leaflet.heat/gh-pages/dist/leaflet-heat.js"></script>
+<script type="text/javascript">
+
+    var addressPoints = [];
+
+    @foreach (var d in Model.seenAPs)
+    {
+      
+        @:addressPoints.push([@d.lat, @d.lon, @d.rssi]);
+    }
+
+    var totalPoints = addressPoints.length;
+	  var firstPoint = [ addressPoints[0][0], addressPoints[0][1] ];
+	  var lastPoint = [ addressPoints[totalPoints-1][0], addressPoints[totalPoints-1][1] ];
+
+    document.getElementById("total_points").innerHTML = totalPoints.toString(); 
+	  document.getElementById("start_point").innerHTML = firstPoint.toString(); 
+	  document.getElementById("end_point").innerHTML = lastPoint.toString();
+
+    var map = L.map('map').setView(lastPoint, 18);
+    var tiles = L.tileLayer('https://{s}.tile.osm.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors',
+        maxZoom: 20,
+        minZoom: 9
+    }).addTo(map);
+    
+    var customIcon = L.icon({
+        iconUrl: '~/visual/heatmap/punto.png',
+        iconSize: [12, 12]
+    });
+
+    for (var i = 0; i < addressPoints.length; i++) {    
+        var message = "Point "+(i+1).toString()+"<br>Coordinate: ("+addressPoints[i][0].toString()+","+addressPoints[i][1].toString()+") <br>Val: "+addressPoints[i][2].toString();
+        marker = new L.marker([addressPoints[i][0],addressPoints[i][1]], {icon: customIcon})
+            .bindPopup(message)
+            .addTo(map);
+    }
+
+    addressPoints = addressPoints.map(function (p) { return [p[0], p[1]]; });
+    var heat = L.heatLayer(addressPoints,{ 
+    	radius: 25,
+        blur: 10, 
+        maxZoom: 20,
+        max: 1.0,
+    	gradient: {
+            0.0: 'green',
+            0.5: 'yellow',
+            1.0: 'red'
+        } 
+    }).addTo(map);
+
+	
+
+    console.log(addressPoints);
+
+</script>
 
