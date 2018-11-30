@@ -14,10 +14,7 @@
 /home/mimi/airo-heat-tool/obj/Debug/netcoreapp2.1/airo-heat-tool.TagHelpers.input.cache
 /home/mimi/airo-heat-tool/obj/Debug/netcoreapp2.1/airo-heat-tool.TagHelpers.output.cache
 /home/mimi/airo-heat-tool/obj/Debug/netcoreapp2.1/airo-heat-tool.RazorCoreGenerate.cache
-/home/mimi/airo-heat-tool/obj/Debug/netcoreapp2.1/Razor/Views/Home/About.g.cshtml.cs
-/home/mimi/airo-heat-tool/obj/Debug/netcoreapp2.1/Razor/Views/Home/Contact.g.cshtml.cs
 /home/mimi/airo-heat-tool/obj/Debug/netcoreapp2.1/Razor/Views/Home/Index.g.cshtml.cs
-/home/mimi/airo-heat-tool/obj/Debug/netcoreapp2.1/Razor/Views/Home/Privacy.g.cshtml.cs
 /home/mimi/airo-heat-tool/obj/Debug/netcoreapp2.1/Razor/Views/Shared/Error.g.cshtml.cs
 /home/mimi/airo-heat-tool/obj/Debug/netcoreapp2.1/Razor/Views/Shared/_CookieConsentPartial.g.cshtml.cs
 /home/mimi/airo-heat-tool/obj/Debug/netcoreapp2.1/Razor/Views/Shared/_Layout.g.cshtml.cs
@@ -31,3 +28,4 @@
 /home/mimi/airo-heat-tool/obj/Debug/netcoreapp2.1/airo-heat-tool.dll
 /home/mimi/airo-heat-tool/obj/Debug/netcoreapp2.1/airo-heat-tool.pdb
 /home/mimi/airo-heat-tool/obj/Debug/netcoreapp2.1/airo-heat-tool.csproj.CopyComplete
+/home/mimi/airo-heat-tool/obj/Debug/netcoreapp2.1/Razor/Views/Tools/HeatMap.g.cshtml.cs

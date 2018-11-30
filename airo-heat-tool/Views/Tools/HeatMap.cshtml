@@ -1,5 +1,6 @@
+@model airo_heat_tool.Models.HeatMap;
+
 @{
-   
 }
 <div class="wrapper">
 
@@ -47,7 +48,7 @@
         
         <!--  Este no es tree, es uno normal - nos puede servir
         <li><a ng-click="page = 'dir_cmd'"><i class="fa fa-terminal"></i> <span>Old - Command Line</span></a></li> -->
-        <li class="treeview menu-open">
+        <li class="treeview">
           <a href="/"><i class="fa fa-fire"></i> <span>Analysis Tools</span>
             <span class="pull-right-container">
                 <i class="fa fa-angle-left pull-right"></i>
@@ -77,6 +78,12 @@
     <section class="content-fluid">
       <h2>@ViewData["Title"]</h2>
       <h3>@ViewData["Message"]</h3>
+      <h4>Acccespoints</h4>
+
+        @foreach(AccessPoint AP in Model.seenAPs){
+          <p>@AP.bssid</p>
+        }
+            
 
       <ng-include src="'html/'+ page +'.html'"></ng-include>
     </section>
