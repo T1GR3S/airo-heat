@@ -1,7 +1,8 @@
 // Based on: https://gist.github.com/dalelane/6ce08b52d5cca8f92926
 
+var config = require('./config');
 var sqlite3 = require('sqlite3').verbose();
-var db = new sqlite3.Database('database.db');
+var db = new sqlite3.Database(config.web.db);
 var bodyParser = require('body-parser');
 var express = require('express');
 var app = express();
@@ -20,5 +21,5 @@ app.get('/data', function(req, res){
     });
 });
 
-app.listen(3000);
+app.listen(config.web.port);
 console.log("Visit http://localhost:3000/data");
