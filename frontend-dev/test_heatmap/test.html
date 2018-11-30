@@ -16,23 +16,28 @@
 <script src="leaflet-heat.js"></script>
 <script src="datapoints.js"></script>
 <script>
-    var map = L.map('map').setView([36.6991373, -4.4384365], 19);
+
+	var mapCenter = [ addressPoints[0][0], addressPoints[0][1] ];
+    var map = L.map('map').setView(mapCenter, 19);
     var tiles = L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
         attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors',
         maxZoom: 21,
         minZoom: 9
     }).addTo(map);
-    addressPoints = addressPoints.map(function (p) { return [p[0], p[1]]; });
-    var heat = L.heatLayer(addressPoints).addTo(map);
-    var greenIcon = L.icon({
+    
+    var customIcon = L.icon({
         iconUrl: 'punto.png',
         iconSize:     [12, 12]
     });
-    for (var i = 0; i < addressPoints.length; i++) {
-        marker = new L.marker([addressPoints[i][0],addressPoints[i][1]], {icon: greenIcon})
-            //.bindPopup(addressPoints[i])
+    for (var i = 0; i < addressPoints.length; i++) {    
+        var message = "Point "+(i+1).toString()+" ("+addressPoints[i][0].toString()+","+addressPoints[i][1].toString()+"). Val: "+addressPoints[i][2].toString();
+        marker = new L.marker([addressPoints[i][0],addressPoints[i][1]], {icon: customIcon})
+            .bindPopup(message)
             .addTo(map);
     }
+    
+    addressPoints = addressPoints.map(function (p) { return [p[0], p[1]]; });
+    var heat = L.heatLayer(addressPoints).addTo(map);
 
 </script>
 </body>
