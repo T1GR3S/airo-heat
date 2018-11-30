@@ -143,6 +143,12 @@ with open(sys.argv[3]) as csv_file:
     line_count = 0
     for row in csv_reader:
         print(row[0] + " "+row[1])
+	if row[4] != ' (not associated) ':
+		try:
+			cursor.execute('''INSERT INTO Connected VALUES(?,?)''',
+                           (row[4], row[0]))
+		except sqlite3.IntegrityError:
+			print('Record already exists')
         try:
             cursor.execute('''INSERT INTO Client VALUES(?,?,?)''',
                            (row[0], 'unknow', 'wifi'))
