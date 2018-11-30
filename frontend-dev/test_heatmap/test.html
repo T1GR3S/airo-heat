@@ -1,24 +1,55 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Leaflet.heat demo</title>
+	<title>Mapa de calor</title>
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
     <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet/v0.7.7/leaflet.css" />
     <script src="http://cdn.leafletjs.com/leaflet/v0.7.7/leaflet.js"></script>
     <link rel="stylesheet" type="text/css" href="style.css">
 </head>
 <body>
 
-<p>
-    Heatmap result
-</p>
+<div class="container">
+	<h2>Mapa de calor</h2>
+	<br>
+	
+	<div id="map"></div>
+	<table class="table table-hover">
+	<thead>
+	  <tr>
+	    <th>Total of points</th>
+	    <th>Start Point</th>
+	    <th>End point</th>
+	  </tr>
+	</thead>
+	<tbody>
+	  <tr>
+	    <td id="total_points">0</td>
+	    <td id="start_point">0</td>
+	    <td id="end_point">0</td>
+	  </tr>
+	</tbody>
+	</table>
 
-<div id="map"></div>
+
+</div>
+
+
+
 <script src="leaflet-heat.js"></script>
 <script src="datapoints.js"></script>
 <script>
-
-	var mapCenter = [ addressPoints[0][0], addressPoints[0][1] ];
-    var map = L.map('map').setView(mapCenter, 19);
+	var totalPoints = addressPoints.length;
+	var firstPoint = [ addressPoints[0][0], addressPoints[0][1] ];
+	var lastPoint = [ addressPoints[totalPoints-1][0], addressPoints[totalPoints-1][1] ];
+	
+	document.getElementById("total_points").innerHTML = totalPoints.toString(); 
+	document.getElementById("start_point").innerHTML = firstPoint.toString(); 
+	document.getElementById("end_point").innerHTML = lastPoint.toString(); 
+	
+    var map = L.map('map').setView(firstPoint, 19);
     var tiles = L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
         attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors',
         maxZoom: 21,
