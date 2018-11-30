@@ -16,9 +16,13 @@ app.set('views', __dirname);
 
 app.get('/data', function(req, res){
     db.all("SELECT lat,lon,signal_rssi FROM SeenAP", function(err, row){
-        console.log(row);
+        //console.log(row);
         res.render('heatmap/test.html', {row:row});
     });
+});
+
+app.get('*', function(req, res) {  
+    res.sendfile('html/index.html');
 });
 
 app.listen(config.web.port);
