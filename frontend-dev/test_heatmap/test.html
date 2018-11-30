@@ -49,16 +49,16 @@
 	document.getElementById("start_point").innerHTML = firstPoint.toString(); 
 	document.getElementById("end_point").innerHTML = lastPoint.toString(); 
 	
-    var map = L.map('map').setView(firstPoint, 19);
+    var map = L.map('map').setView(firstPoint, 18);
     var tiles = L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
         attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors',
-        maxZoom: 21,
+        maxZoom: 20,
         minZoom: 9
     }).addTo(map);
     
     var customIcon = L.icon({
         iconUrl: 'punto.png',
-        iconSize:     [12, 12]
+        iconSize: [12, 12]
     });
     for (var i = 0; i < addressPoints.length; i++) {    
         var message = "Point "+(i+1).toString()+"<br>Coordinate: ("+addressPoints[i][0].toString()+","+addressPoints[i][1].toString()+") <br>Val: "+addressPoints[i][2].toString();
@@ -68,7 +68,17 @@
     }
     
     addressPoints = addressPoints.map(function (p) { return [p[0], p[1]]; });
-    var heat = L.heatLayer(addressPoints).addTo(map);
+    var heat = L.heatLayer(addressPoints,{ 
+    	radius: 25,
+        blur: 10, 
+        maxZoom: 20,
+        max: 1.0,
+    	gradient: {
+            0.0: 'green',
+            0.5: 'yellow',
+            1.0: 'red'
+        } 
+    }).addTo(map);
 
 </script>
 </body>
