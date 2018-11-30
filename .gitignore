@@ -3,3 +3,9 @@ airo-heat-tool/bin/Debug/netcoreapp2.1
 backend-dev/node_server/node_modules
 backend-dev/node_server/database.db
 database.sql
+
+*.db
+
+database-dev/pruebaAircrack/
+
+database-dev/pruebaKismet/
