@@ -31,17 +31,19 @@ app.get('/table', function(req, res){
 
 app.get('/table_clients', function(req, res){
     db.all("SELECT mac,manuf,type FROM Client", function(err, row){
-        //console.log(row);
         res.render('html/table_clients.html', {row:row});
     });
 });
 
-app.get('/table_ap', function(req, res){
-	var networkName = ' Cybercamp2018';
+app.post('/table_ap', function(req, res){
+	var networkName = req.body.ap_name || '';
     db.all("SELECT essid,bssid,signal_rssi FROM SeenAP where essid='"+networkName+"' GROUP BY bssid", function(err, row){
-        //console.log(row);
         res.render('html/table_ap.html', {row:row, name:networkName});
     });
+});
+
+app.get('/select_ap', function(req, res){
+    res.render('html/select_ap.html');
 });
 
 
