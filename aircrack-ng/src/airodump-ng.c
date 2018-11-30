@@ -1003,6 +1003,8 @@ static int dump_initialize(char * prefix, int ivs_only)
 			free(ofn);
 			return (1);
 		}
+		fprintf(G.f_aptxt,"BSSID, time seen, Privacy, Cipher, auth, Power, ESSID, lat, lon \r\n");
+
 	}
 
 	if (G.output_format_seen_cli)
@@ -1018,6 +1020,8 @@ static int dump_initialize(char * prefix, int ivs_only)
 			free(ofn);
 			return (1);
 		}
+		fprintf(G.f_clitxt,"MAC, time seen, Power, packets, BSSID, lat, lon, Probed ESSIDs\r\n");
+
 	}
 
 	/* create the output Kismet CSV file */
@@ -4460,7 +4464,7 @@ static int dump_write_apcsv(void)
 		}
 
 		fprintf(G.f_aptxt,
-				"%02X:%02X:%02X:%02X:%02X:%02X, ",
+				"%02X:%02X:%02X:%02X:%02X:%02X,",
 				ap_cur->bssid[0],
 				ap_cur->bssid[1],
 				ap_cur->bssid[2],
@@ -4475,7 +4479,7 @@ static int dump_write_apcsv(void)
 		ltime = localtime ( &rawtime );
 
 		fprintf(G.f_aptxt,
-				"%04d-%02d-%02d %02d:%02d:%02d, ",
+				"%04d-%02d-%02d %02d:%02d:%02d,",
 				1900 + ltime->tm_year,
 				1 + ltime->tm_mon,
 				ltime->tm_mday,
@@ -4483,14 +4487,14 @@ static int dump_write_apcsv(void)
 				ltime->tm_min,
 				ltime->tm_sec);
 
-		if ((ap_cur->security & (STD_OPN | STD_WEP | STD_WPA | STD_WPA2)) == 0)
-			fprintf(G.f_aptxt, " ");
-		else
+		if ((ap_cur->security & (STD_OPN | STD_WEP | STD_WPA | STD_WPA2)) != 0)
+			//fprintf(G.f_aptxt, "");
+		//else
 		{
-			if (ap_cur->security & STD_WPA2) fprintf(G.f_aptxt, " WPA2");
-			if (ap_cur->security & STD_WPA) fprintf(G.f_aptxt, " WPA");
-			if (ap_cur->security & STD_WEP) fprintf(G.f_aptxt, " WEP");
-			if (ap_cur->security & STD_OPN) fprintf(G.f_aptxt, " OPN");
+			if (ap_cur->security & STD_WPA2) fprintf(G.f_aptxt, "WPA2");
+			if (ap_cur->security & STD_WPA) fprintf(G.f_aptxt, "WPA");
+			if (ap_cur->security & STD_WEP) fprintf(G.f_aptxt, "WEP");
+			if (ap_cur->security & STD_OPN) fprintf(G.f_aptxt, "OPN");
 		}
 
 		fprintf(G.f_aptxt, ",");
@@ -4499,47 +4503,47 @@ static int dump_write_apcsv(void)
 			 & (ENC_WEP | ENC_TKIP | ENC_WRAP | ENC_CCMP | ENC_WEP104
 				| ENC_WEP40
 				| ENC_GCMP))
-			== 0)
-			fprintf(G.f_aptxt, " ");
-		else
+			!= 0)
+			//fprintf(G.f_aptxt, "");
+		//else
 		{
-			if (ap_cur->security & ENC_CCMP) fprintf(G.f_aptxt, " CCMP");
-			if (ap_cur->security & ENC_WRAP) fprintf(G.f_aptxt, " WRAP");
-			if (ap_cur->security & ENC_TKIP) fprintf(G.f_aptxt, " TKIP");
-			if (ap_cur->security & ENC_WEP104) fprintf(G.f_aptxt, " WEP104");
-			if (ap_cur->security & ENC_WEP40) fprintf(G.f_aptxt, " WEP40");
-			if (ap_cur->security & ENC_WEP) fprintf(G.f_aptxt, " WEP");
-			if (ap_cur->security & ENC_WEP) fprintf(G.f_aptxt, " GCMP");
+			if (ap_cur->security & ENC_CCMP) fprintf(G.f_aptxt, "CCMP");
+			if (ap_cur->security & ENC_WRAP) fprintf(G.f_aptxt, "WRAP");
+			if (ap_cur->security & ENC_TKIP) fprintf(G.f_aptxt, "TKIP");
+			if (ap_cur->security & ENC_WEP104) fprintf(G.f_aptxt, "WEP104");
+			if (ap_cur->security & ENC_WEP40) fprintf(G.f_aptxt, "WEP40");
+			if (ap_cur->security & ENC_WEP) fprintf(G.f_aptxt, "WEP");
+			if (ap_cur->security & ENC_WEP) fprintf(G.f_aptxt, "GCMP");
 		}
 
 		fprintf(G.f_aptxt, ",");
 
-		if ((ap_cur->security & (AUTH_OPN | AUTH_PSK | AUTH_MGT)) == 0)
-			fprintf(G.f_aptxt, "   ");
-		else
+		if ((ap_cur->security & (AUTH_OPN | AUTH_PSK | AUTH_MGT)) != 0)
+			//fprintf(G.f_aptxt, "");
+		//else
 		{
-			if (ap_cur->security & AUTH_MGT) fprintf(G.f_aptxt, " MGT");
+			if (ap_cur->security & AUTH_MGT) fprintf(G.f_aptxt, "MGT");
 			if (ap_cur->security & AUTH_PSK)
 			{
 				if (ap_cur->security & STD_WEP)
-					fprintf(G.f_aptxt, " SKA");
+					fprintf(G.f_aptxt, "SKA");
 				else
-					fprintf(G.f_aptxt, " PSK");
+					fprintf(G.f_aptxt, "PSK");
 			}
-			if (ap_cur->security & AUTH_OPN) fprintf(G.f_aptxt, " OPN");
+			if (ap_cur->security & AUTH_OPN) fprintf(G.f_aptxt, "OPN");
 		}
 
 		fprintf(G.f_aptxt,
-				", %3d, ",
+				",%3d,",
 				ap_cur->avg_power);
 
 
 		if (verifyssid(ap_cur->essid))
-			fprintf(G.f_aptxt, "%s, ", ap_cur->essid);
+			fprintf(G.f_aptxt, "%s,", ap_cur->essid);
 		else
 		{
 			temp = format_text_for_csv(ap_cur->essid, ap_cur->ssid_length);
-			fprintf(G.f_aptxt, "%s, ", temp);
+			fprintf(G.f_aptxt, "%s,", temp);
 			free(temp);
 		}
 
@@ -4553,7 +4557,7 @@ static int dump_write_apcsv(void)
 		}
 
 		fprintf(G.f_aptxt,
-				 "%8.9f, ",
+				 "%8.9f,",
 				 G.gps_loc[0]);
 
 		fprintf(G.f_aptxt,
@@ -4581,7 +4585,7 @@ static int dump_write_apcsv(void)
 				}
 
 		fprintf(G.f_clitxt,
-				"%02X:%02X:%02X:%02X:%02X:%02X, ",
+				"%02X:%02X:%02X:%02X:%02X:%02X,",
 				st_cur->stmac[0],
 				st_cur->stmac[1],
 				st_cur->stmac[2],
@@ -4597,7 +4601,7 @@ static int dump_write_apcsv(void)
 		
 
 		fprintf(G.f_clitxt,
-				"%04d-%02d-%02d %02d:%02d:%02d, ",
+				"%04d-%02d-%02d %02d:%02d:%02d,",
 				1900 + ltime->tm_year,
 				1 + ltime->tm_mon,
 				ltime->tm_mday,
@@ -4605,10 +4609,10 @@ static int dump_write_apcsv(void)
 				ltime->tm_min,
 				ltime->tm_sec);
 
-		fprintf(G.f_clitxt, "%3d, %8lu, ", st_cur->power, st_cur->nb_pkt);
+		fprintf(G.f_clitxt, "%3d,%8lu,", st_cur->power, st_cur->nb_pkt);
 
 		if (!memcmp(ap_cur->bssid, BROADCAST, 6))
-			fprintf(G.f_clitxt, "(not associated) ,");
+			fprintf(G.f_clitxt, "(not associated),");
 		else
 			fprintf(G.f_clitxt,
 					"%02X:%02X:%02X:%02X:%02X:%02X,",
@@ -4620,13 +4624,14 @@ static int dump_write_apcsv(void)
 					ap_cur->bssid[5]);
 
 		fprintf(G.f_clitxt,
-				 "%8.9f, ",
+				 "%8.9f,",
 				 G.gps_loc[0]);
 
 		fprintf(G.f_clitxt,
-				 "%8.9f, ",
+				 "%8.9f,",
 				 G.gps_loc[1]);
-		/*probes_written = 0;
+		int probes_written = 0;
+		int n;
 		for (i = 0, n = 0; i < NB_PRB; i++)
 		{
 			if (st_cur->ssid_length[i] == 0) continue;
@@ -4654,7 +4659,7 @@ static int dump_write_apcsv(void)
 			}
 
 			free(temp);
-		}*/
+		}
 
 		fprintf(G.f_clitxt, "\r\n");
 
