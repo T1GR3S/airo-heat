@@ -61,7 +61,7 @@
         iconSize:     [12, 12]
     });
     for (var i = 0; i < addressPoints.length; i++) {    
-        var message = "Point "+(i+1).toString()+" ("+addressPoints[i][0].toString()+","+addressPoints[i][1].toString()+"). Val: "+addressPoints[i][2].toString();
+        var message = "Point "+(i+1).toString()+"<br>Coordinate: ("+addressPoints[i][0].toString()+","+addressPoints[i][1].toString()+") <br>Val: "+addressPoints[i][2].toString();
         marker = new L.marker([addressPoints[i][0],addressPoints[i][1]], {icon: customIcon})
             .bindPopup(message)
             .addTo(map);
