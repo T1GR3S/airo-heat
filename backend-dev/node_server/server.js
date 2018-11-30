@@ -21,6 +21,13 @@ app.get('/data', function(req, res){
     });
 });
 
+app.get('/table', function(req, res){
+    db.all("SELECT lat,lon,signal_rssi FROM SeenAP", function(err, row){
+        //console.log(row);
+        res.render('html/tables.html', {row:row});
+    });
+});
+
 app.get('*', function(req, res) {  
     res.sendfile('html/index.html');
 });

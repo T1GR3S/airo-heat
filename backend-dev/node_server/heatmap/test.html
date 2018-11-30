@@ -50,6 +50,7 @@ Based on: http://bl.ocks.org/awoodruff/0883d211538ed05a82fd1b82bd65bf34
 <script>
     
     var row = <%- JSON.stringify(row) %>;
+    console.log(row);
     var addressPoints = [];
 	for(var i in row)
 	    addressPoints.push(Object.values(row[i]));

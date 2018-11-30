@@ -1,0 +1,38 @@
+<meta charset="utf-8">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.6/css/bootstrap.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.10.1/bootstrap-table.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.6/js/bootstrap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.10.1/bootstrap-table.min.js"></script>
+<script src="aps.js"></script>
+
+<div class="container">
+  <h2>Tabla de ejemplo</h2>
+  <br>
+
+  <table class="table table-striped">
+     <tr>
+        <th>Latitud</th><th>Longitud</th><th>RSSI</th>
+     </tr>
+
+     <% for (var i = 0; i < row.length; i++) { %>
+      <!-- <tr class="accordion-toggle"  data-toggle="collapse" data-target="#collapseOne"> -->
+      <tr>
+        <td><%= row[i]["lat"] %></td>
+        <td><%= row[i]["lon"] %></td>
+        <td><%= row[i]["signal_rssi"] %></td>
+      </tr>
+      
+      <!--
+      <tr>
+        <td></td>
+        <td colspan="3">
+        <div id="collapseOne" class="collapse">
+        Details 1
+        </div></td>
+      </tr>
+      -->
+
+     <% } %>
+  </table>
+</div>
