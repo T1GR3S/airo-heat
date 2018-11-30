@@ -118,7 +118,7 @@ using airo_heat_tool.Models;
             <li>");
             EndContext();
             BeginContext(1861, 91, false);
-            __tagHelperExecutionContext = __tagHelperScopeManager.Begin("a", global::Microsoft.AspNetCore.Razor.TagHelpers.TagMode.StartTagAndEndTag, "1b5ad220362f4f2b964f120af210f9b3", async() => {
+            __tagHelperExecutionContext = __tagHelperScopeManager.Begin("a", global::Microsoft.AspNetCore.Razor.TagHelpers.TagMode.StartTagAndEndTag, "89cb6b3b664e414da476fdd40d9d7753", async() => {
                 BeginContext(1906, 42, true);
                 WriteLiteral("<i class=\"fa fa-circle-o\"></i> Statistics ");
                 EndContext();
@@ -142,7 +142,7 @@ using airo_heat_tool.Models;
             WriteLiteral("</li>\r\n            <li>");
             EndContext();
             BeginContext(1975, 90, false);
-            __tagHelperExecutionContext = __tagHelperScopeManager.Begin("a", global::Microsoft.AspNetCore.Razor.TagHelpers.TagMode.StartTagAndEndTag, "27e6240d739d45bfa270281b8a7cda4a", async() => {
+            __tagHelperExecutionContext = __tagHelperScopeManager.Begin("a", global::Microsoft.AspNetCore.Razor.TagHelpers.TagMode.StartTagAndEndTag, "f130cdadf603415e871f38ba450af767", async() => {
                 BeginContext(2022, 39, true);
                 WriteLiteral("<i class=\"fa fa-circle-o\"></i> HeatMap ");
                 EndContext();
@@ -166,7 +166,7 @@ using airo_heat_tool.Models;
             WriteLiteral("</li>\r\n            <li>");
             EndContext();
             BeginContext(2088, 105, false);
-            __tagHelperExecutionContext = __tagHelperScopeManager.Begin("a", global::Microsoft.AspNetCore.Razor.TagHelpers.TagMode.StartTagAndEndTag, "b4e85bcbc0304a9293ac5f71711c3ca4", async() => {
+            __tagHelperExecutionContext = __tagHelperScopeManager.Begin("a", global::Microsoft.AspNetCore.Razor.TagHelpers.TagMode.StartTagAndEndTag, "163bc539a07143f0bd1aca5654a119af", async() => {
                 BeginContext(2139, 50, true);
                 WriteLiteral("<i class=\"fa fa-circle-o\"></i> Client Enumeration ");
                 EndContext();
