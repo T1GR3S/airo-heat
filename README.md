@@ -2,16 +2,16 @@
 Repositorio del equipo T1GR3$ en el hackathon de Cybercamp 2018
 
 
-
 # TODO
 
-- Create script to install dependencies 
+- Leyenda en el mapa
 
+- Ruta de puntos en el mapa
 
-
-# Installation
 
 ## Node Server 
+
+### Installation
 
 *sudo apt-get install node nodejs-legacy npm*
 
@@ -24,6 +24,13 @@ Repositorio del equipo T1GR3$ en el hackathon de Cybercamp 2018
 *npm i ejs --build-from-source*
 
 
+### Running
+
+*node server.js*
+
+Visit localhost:3000
+
+## Screenshots
 
 
 # Authors
