@@ -13,15 +13,17 @@ Repositorio del equipo T1GR3$ en el hackathon de Cybercamp 2018
 
 ## Node Server 
 
-*sudo apt-get install node nodejs-legacy npm *
+*sudo apt-get install node nodejs-legacy npm*
 
-*npm i express --build-from-source  *
+*npm i express --build-from-source*
 
-*npm i sqlite3 --build-from-source  *
+*npm i sqlite3 --build-from-source*
 
 *npm i body-parser --build-from-source*  
 
 *npm i ejs --build-from-source*
+
+
 
 
 # Authors
