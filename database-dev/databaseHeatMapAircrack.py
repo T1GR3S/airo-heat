@@ -3,14 +3,17 @@ import xml.etree.ElementTree
 import sqlite3
 import sys
 
-if sys.argv[1] == "-h" or sys.argv[1] =="--help":
-    print '''
-    Usage: databaseHeatMapAircrack.py <outputDB> <inputAP> <inputClient>
-    \t outputDB: Database de salida SQLite3
-    \t inputAP: Fichero de aircrack modificado con los ap (formato .ap.csv)
-    \t inputClient: Fichero de aircrack modificado con los clientes (formato .cli.csv)
-    '''
-    sys.exit(0) 
+
+if len(sys.argv) > 1:
+    if sys.argv[1] == "-h" or sys.argv[1] =="--help":
+        print '''
+        Usage: databaseHeatMapAircrack.py <outputDB> <inputAP> <inputClient>
+        \t outputDB: Database de salida SQLite3
+        \t inputAP: Fichero de aircrack modificado con los ap (formato .ap.csv)
+        \t inputClient: Fichero de aircrack modificado con los clientes (formato .cli.csv)
+        '''
+        sys.exit(0) 
+
 if len(sys.argv) < 4:
     print 'databaseHeatMapAircrack.py <outputDB> <inputAP> <inputClient>'
     sys.exit(2)

@@ -2,13 +2,14 @@ import xml.etree.ElementTree
 import sqlite3
 import sys
 
-if sys.argv[1] == "-h" or sys.argv[1] =="--help":
-    print '''
-    Usage: databaseHeatMap.py <outputDB> <inputKismet>
-    \t outputDB: Database de salida SQLite3
-    \t inputAP: Fichero de kismet con los ap  y gps (formato .gpsxml)
-    '''
-    sys.exit(0)
+if len(sys.argv) > 1:
+    if sys.argv[1] == "-h" or sys.argv[1] =="--help":
+        print '''
+        Usage: databaseHeatMap.py <outputDB> <inputKismet>
+        \t outputDB: Database de salida SQLite3
+        \t inputAP: Fichero de kismet con los ap  y gps (formato .gpsxml)
+        '''
+        sys.exit(0)
 
 
 if len(sys.argv) < 3:
