@@ -83,16 +83,16 @@
                   peso = 0;
                 }
                 if (absvalue < 85 && absvalue>= 70){
-                  peso = 15;
+                  peso = 10;
                 }
                 if (absvalue < 70 && absvalue>= 50){
                   peso = 30;
                 }
                 if (absvalue < 50 && absvalue>= 30){
-                  peso = 60;
+                  peso = 80;
                 }
                 if (absvalue < 30 && absvalue>= 20){
-                  peso = 80;
+                  peso = 90;
                 }
                 if (absvalue < 20 && absvalue>= 2){
                   peso = 100;
@@ -109,7 +109,7 @@
       map = new google.maps.Map(document.getElementById('map'), {
         zoom: 16,
         center: {lat: addressPoints[3][0], lng: addressPoints[3][1]},
-        mapTypeId: 'map'
+        mapTypeId: 'satellite'
       });
 
       heatmap = new google.maps.visualization.HeatmapLayer({
@@ -151,6 +151,6 @@
     }
 
   </script>
-  
+
 </body>
 </html>
