@@ -3651,7 +3651,7 @@ static void dump_print(int ws_row, int ws_col, int if_num)
 	{
 		snprintf(buffer,
 				 sizeof(buffer) - 1,
-				 " %s[ GPS %8.3f %8.3f %8.3f %6.2f "
+				 " %s[ GPS %8.5f %8.5f %8.3f %6.2f "
 				 "][ Elapsed: %s ][ %04d-%02d-%02d %02d:%02d ",
 				 G.batt,
 				 G.gps_loc[0],
@@ -4556,6 +4556,7 @@ static int dump_write_apcsv(void)
 			}
 		}
 
+
 		fprintf(G.f_aptxt,
 				 "%8.9f,",
 				 G.gps_loc[0]);
@@ -4623,12 +4624,13 @@ static int dump_write_apcsv(void)
 					ap_cur->bssid[4],
 					ap_cur->bssid[5]);
 
+
 		fprintf(G.f_clitxt,
-				 "%8.9f,",
+				 "%8.5f,",
 				 G.gps_loc[0]);
 
 		fprintf(G.f_clitxt,
-				 "%8.9f,",
+				 "%8.5f,",
 				 G.gps_loc[1]);
 		int probes_written = 0;
 		int n;
