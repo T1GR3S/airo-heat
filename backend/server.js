@@ -38,22 +38,31 @@ app.get('/table', function(req, res){
 });
 */
 
-app.get('/table_clients', function(req, res){
-    db.all("SELECT mac,manuf,type FROM Client", function(err, row){
+app.get('/select_clients', function(req, res){
+    db.all("SELECT distinct essid from SeenAP", function(err, row){
+        res.render('html/select_client.html', {row:row});
+    });
+});
+
+app.post('/table_clients', function(req, res){
+    var networkName = req.body.network_name || '';
+    db.all("SELECT Connected.bssid, mac, Client.type as 'Type (Wifi/Bluetooth)' from Connected NATURAL JOIN Client WHERE Connected.bssid in (SELECT bssid FROM SeenAp where essid='"+networkName+"')", function(err, row){
         res.render('html/table_clients.html', {row:row});
     });
 });
 
+//APs filtered by ESSID
 app.post('/table_ap', function(req, res){
 	var networkName = req.body.ap_name || '';
-    db.all("SELECT essid,bssid,signal_rssi FROM SeenAP where essid='"+networkName+"' GROUP BY bssid", function(err, row){
+    db.all("SELECT essid, bssid, MAX(signal_rssi) 'Max RSSI', MIN(signal_rssi) 'Min RSSI', CAST(round(AVG(signal_rssi)) as int) 'Average RSSI' FROM SeenAP where essid='"+networkName+"' GROUP BY bssid", function(err, row){
         res.render('html/table_ap.html', {row:row, name:networkName});
     });
 });
 
+//APs filtered by BSSID
 app.post('/table_ap_mac', function(req, res){
 	var networkMAC= req.body.ap_mac || '';
-    db.all("SELECT essid,bssid,signal_rssi FROM SeenAP where bssid='"+networkMAC+"' GROUP BY bssid", function(err, row){
+    db.all("SELECT essid, bssid, MAX(signal_rssi) 'Max RSSI', MIN(signal_rssi) 'Min RSSI', CAST(round(AVG(signal_rssi)) as int) 'Average RSSI' FROM SeenAP where bssid='"+networkMAC+"' GROUP BY bssid", function(err, row){
         res.render('html/table_ap.html', {row:row, name:networkMAC});
     });
 });

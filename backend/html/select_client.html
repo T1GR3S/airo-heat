@@ -62,7 +62,7 @@
             <li><a href="/select_heatmap_name"><i class="fa fa-circle-o"></i>By NAME</a></li>
             <li><a href="/select_heatmap_mac"><i class="fa fa-circle-o"></i>By BSSID</a></li>
           </ul>
-        </li>
+        </li>        
       
 
         <li class="header">Contact</li>
@@ -76,10 +76,14 @@
         
         <div class="row">
             <div class="col-sm-8 col-sm-offset-2 ">
-                <h3>Select Access Point MAC:</h3>
-                <form  method="post" action="/heatmap_mac">
+                <h3>Select Network</h3>
+                <form  method="post" action="/table_clients">
                     <div class="form-group">
-                        <input name="ap_mac" id="ap_mac" class="form-control input-lg console">
+                      <select class="form-control selcls" name="network_name" id="network_name">
+                          <% for (var i = 0; i < row.length; i++) { %>
+                            <option><%= row[i]["essid"] %></option>                              
+                           <% } %>
+                      </select>
                     </div>
                     <button class="btn btn-primary">Submit</button>
                 </form>
