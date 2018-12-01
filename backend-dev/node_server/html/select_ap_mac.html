@@ -40,9 +40,29 @@
       </div>
       <ul class="sidebar-menu" data-widget="tree">
         <li class="header">Functionalities</li>
-        <li><a href="/data"><i class="fa fa-fire"></i> <span>Heatmap test</span></a></li>        
-        <li><a href="/table"><i class="fa fa-table"></i> <span>Table test</span></a></li>
-        
+        <li class="treeview">
+          <a href="/"><i class="fa fa-wifi"></i> <span>Access point Info</span>
+            <span class="pull-right-container">
+                <i class="fa fa-angle-left pull-right"></i>
+              </span>
+          </a>
+          <ul class="treeview-menu">
+            <li><a href="/select_ap"><i class="fa fa-circle-o"></i>By NAME</a></li>
+            <li><a href="/select_ap_mac"><i class="fa fa-circle-o"></i>By BSSID</a></li>
+          </ul>
+        </li>
+        <li><a href="/table_clients"><i class="fa fa-user"></i> <span>Clients Info</span></a></li>
+        <li class="treeview">
+          <a href="/"><i class="fa fa-fire"></i> <span>Heatmap</span>
+            <span class="pull-right-container">
+                <i class="fa fa-angle-left pull-right"></i>
+              </span>
+          </a>
+          <ul class="treeview-menu">
+            <li><a href="/select_heatmap_name"><i class="fa fa-circle-o"></i>By NAME</a></li>
+            <li><a href="/select_heatmap_mac"><i class="fa fa-circle-o"></i>By BSSID</a></li>
+          </ul>
+        </li>
       
 
         <li class="header">Contact</li>
