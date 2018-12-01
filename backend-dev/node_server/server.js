@@ -21,6 +21,7 @@ app.get('/data', function(req, res){
     });
 });
 
+
 app.get('/table', function(req, res){
     db.all("SELECT lat,lon,signal_rssi FROM SeenAP where essid=' Cybercamp2018'", function(err, row){
         //console.log(row);
@@ -42,8 +43,43 @@ app.post('/table_ap', function(req, res){
     });
 });
 
+app.post('/table_ap_mac', function(req, res){
+	var networkMAC= req.body.ap_mac || '';
+    db.all("SELECT essid,bssid,signal_rssi FROM SeenAP where bssid='"+networkMAC+"' GROUP BY bssid", function(err, row){
+        res.render('html/table_ap.html', {row:row, name:networkMAC});
+    });
+});
+
 app.get('/select_ap', function(req, res){
     res.render('html/select_ap.html');
+});
+
+app.get('/select_ap_mac', function(req, res){
+    res.render('html/select_ap_mac.html');
+});
+
+app.get('/select_heatmap_name', function(req, res){
+    res.render('html/select_heatmap_name.html');
+});
+
+app.get('/select_heatmap_mac', function(req, res){
+    res.render('html/select_heatmap_mac.html');
+});
+
+app.post('/heatmap_name', function(req, res){
+	var networkName = req.body.ap_name || '';
+    db.all("SELECT lat,lon,signal_rssi FROM SeenAP where essid='"+networkName+"'", function(err, row){
+        //console.log(row);
+        res.render('heatmap/test.html', {row:row});
+    });
+});
+
+app.post('/heatmap_mac', function(req, res){
+	var networkMAC= req.body.ap_mac || '';
+    db.all("SELECT lat,lon,signal_rssi FROM SeenAP where bssid='"+networkMAC+"'", function(err, row){
+        //console.log(row);
+        res.render('heatmap/test.html', {row:row});
+    });
 });
 
 

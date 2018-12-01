@@ -40,31 +40,10 @@
       </div>
       <ul class="sidebar-menu" data-widget="tree">
         <li class="header">Functionalities</li>
-        <!---------------------------------------------------------------------------------------->
-        <li class="treeview">
-          <a href="/"><i class="fa fa-wifi"></i> <span>Access point Info</span>
-            <span class="pull-right-container">
-                <i class="fa fa-angle-left pull-right"></i>
-              </span>
-          </a>
-          <ul class="treeview-menu">
-            <li><a href="/select_ap"><i class="fa fa-circle-o"></i>By NAME</a></li>
-            <li><a href="/select_ap_mac"><i class="fa fa-circle-o"></i>By BSSID</a></li>
-          </ul>
-        </li>
-        <li><a href="/table_clients"><i class="fa fa-user"></i> <span>Clients Info</span></a></li>
-        <li class="treeview">
-          <a href="/"><i class="fa fa-fire"></i> <span>Heatmap</span>
-            <span class="pull-right-container">
-                <i class="fa fa-angle-left pull-right"></i>
-              </span>
-          </a>
-          <ul class="treeview-menu">
-            <li><a href="/select_heatmap_name"><i class="fa fa-circle-o"></i>By NAME</a></li>
-            <li><a href="/select_heatmap_mac"><i class="fa fa-circle-o"></i>By BSSID</a></li>
-          </ul>
-        </li>
-        <!---------------------------------------------------------------------------------------->
+        <li><a href="/data"><i class="fa fa-fire"></i> <span>Heatmap test</span></a></li>        
+        <li><a href="/table"><i class="fa fa-table"></i> <span>Table test</span></a></li>
+        
+      
 
         <li class="header">Contact</li>
         <li><a href="https://github.com/T1GR3S/airo-Heat" target="_blank"><i class="fa fa-github-alt"></i> <span>Github</span></a></li>
@@ -72,7 +51,21 @@
     </section>
   </aside>
   <div class="content-wrapper">
-    <p></p>
+    <div id="overlay">
+        
+        
+        <div class="row">
+            <div class="col-sm-8 col-sm-offset-2 ">
+                <h3>Select Access Point MAC:</h3>
+                <form  method="post" action="/heatmap_mac">
+                    <div class="form-group">
+                        <input name="ap_mac" id="ap_mac" class="form-control input-lg console">
+                    </div>
+                    <button class="btn btn-primary">Submit</button>
+                </form>
+            </div>
+        </div>
+        </div>
   </div>
 </div>
 
@@ -84,3 +77,5 @@
 
 </body>
 </html>
+
+
