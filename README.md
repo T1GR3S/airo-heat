@@ -8,10 +8,13 @@ Repositorio del equipo T1GR3$ en el hackathon de Cybercamp 2018
 
 - Ruta de puntos en el mapa
 
+---------------------------------------------
+
+
 ## Aircrack-ng 
 
 
-### Install modification. 
+### Install modification
 
 *sudo apt-get install build-essential autoconf automake libtool pkg-config libnl-3-dev libnl-genl-3-dev libssl-dev libsqlite3-dev libpcre3-dev ethtool shtool rfkill zlib1g-dev libpcap-dev*
 
@@ -36,7 +39,7 @@ Repositorio del equipo T1GR3$ en el hackathon de Cybercamp 2018
 *airodump-ng wlan0mon -w prueba --gpsd --berlin 5 --write-interval 3*
 
 
-## Create Database
+## Creating Database
 
 *python databaseHeatMapAircrack.py <outputDB> <inputAP> <inputClient>*
 
@@ -49,7 +52,8 @@ Donde:
       	inputClient: Fichero de aircrack modificado con los clientes (formato .cli.csv)
 
       	
-      	
+---------------------------------------------
+
 ## Node Server 
 
 ### Installation
@@ -64,6 +68,8 @@ Donde:
 
 *npm i ejs --build-from-source*
 
+Fill config.js
+
 
 ### Running
 
@@ -71,8 +77,8 @@ Donde:
 
 Visit localhost:3000
 
-## Screenshots
 
+---------------------------------------------
 
 # Authors
 
