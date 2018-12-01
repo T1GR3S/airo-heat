@@ -79,13 +79,13 @@
       <br>
       <table class="table table-striped">
          <tr>
-            <th>MAC</th><th>Manufacturer</th><th>Type</th>
+            <th>BSSID</th><th>Client MAC</th><th>Type (Wifi/Bluetooth)</th>
          </tr>
          <% for (var i = 0; i < row.length; i++) { %>
           <tr>
+            <td><%= row[i]["bssid"] %></td>
             <td><%= row[i]["mac"] %></td>
-            <td><%= row[i]["manuf"] %></td>
-            <td><%= row[i]["type"] %></td>
+            <td><%= row[i]["Type (Wifi/Bluetooth)"] %></td>
           </tr>
          <% } %>
       </table>

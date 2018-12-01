@@ -2,7 +2,7 @@
 <html>
 <head>
   <meta charset="utf-8">
-  <title>Heatmaps</title>
+  <title>Heatmaps result</title>
   <style>
       /* Always set the map height explicitly to define the size of the div
       * element that contains the map. */
@@ -63,9 +63,7 @@
           var totalPoints = addressPoints.length;
           var firstPoint = [ addressPoints[3][0], addressPoints[3][1] ];
           var lastPoint = [ addressPoints[totalPoints-1][0], addressPoints[totalPoints-1][1] ];
-          console.log(totalPoints);
-
-
+          
           var map, heatmap;
 
           function initMap() {
@@ -107,7 +105,7 @@
 
 
       map = new google.maps.Map(document.getElementById('map'), {
-        zoom: 16,
+        zoom: 17,
         center: {lat: addressPoints[3][0], lng: addressPoints[3][1]},
         mapTypeId: 'satellite'
       });
@@ -116,6 +114,17 @@
         data: heatMapData,
         map: map
       });
+
+      /*
+      var line = [];
+      for (var i = 0; i < addressPoints.length; i++) {
+        line.push(new GLatLng(addressPoints[i][0],addressPoints[i][1]));
+      }
+      console.log(line);
+      var polyline = new GPolyline(line, "#000000",5); 
+      map.addOverlay(polyline);
+      */
+
     }
 
     function toggleHeatmap() {
@@ -151,6 +160,9 @@
     }
 
   </script>
+  <script async defer
+        src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCuazUoHDdZAafei1k90SUv4HNBWOtMQPI&libraries=visualization&callback=initMap">
+    </script>
 
 
 </body>
