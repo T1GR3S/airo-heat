@@ -2,13 +2,6 @@
 Repositorio del equipo T1GR3$ en el hackathon de Cybercamp 2018
 
 
-# TODO
-
-- Leyenda en el mapa
-
-- Ruta de puntos en el mapa
-
----------------------------------------------
 
 
 ## Aircrack-ng 
@@ -76,6 +69,15 @@ Fill config.js
 *node server.js*
 
 Visit localhost:3000
+
+
+---------------------------------------------
+
+# TODO
+
+- Leyenda en el mapa
+
+- Ruta de puntos en el mapa
 
 
 ---------------------------------------------
