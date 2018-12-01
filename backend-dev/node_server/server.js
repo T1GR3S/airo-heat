@@ -13,7 +13,6 @@ app.engine('html', require('ejs').renderFile);
 app.set('view engine', 'html');
 app.set('views', __dirname);
 
-
 app.get('/data', function(req, res){
     db.all("SELECT lat,lon,signal_rssi FROM SeenAP where essid=' Cybercamp2018'", function(err, row){
         //console.log(row);
@@ -21,14 +20,23 @@ app.get('/data', function(req, res){
     });
 });
 
+/// BORRAR
+app.get('/data2', function(req, res){
+    db.all("SELECT lat,lon,signal_rssi FROM SeenAP where essid=' Cybercamp2018'", function(err, row){
+        //console.log(row);
+        res.render('heatmap/prueba.html', {row:row});
+    });
+});
 
+/*
+/// BORRAR
 app.get('/table', function(req, res){
     db.all("SELECT lat,lon,signal_rssi FROM SeenAP where essid=' Cybercamp2018'", function(err, row){
         //console.log(row);
         res.render('html/tables.html', {row:row});
     });
 });
-
+*/
 
 app.get('/table_clients', function(req, res){
     db.all("SELECT mac,manuf,type FROM Client", function(err, row){
@@ -68,20 +76,20 @@ app.get('/select_heatmap_mac', function(req, res){
 
 app.post('/heatmap_name', function(req, res){
 	var networkName = req.body.ap_name || '';
-    db.all("SELECT lat,lon,signal_rssi FROM SeenAP where essid='"+networkName+"'", function(err, row){
+    db.all("SELECT lat,lon,MAX(signal_rssi) FROM SeenAP where essid='"+networkName+"' GROUP BY lat,lon", function(err, row){
         //console.log(row);
-        res.render('heatmap/test.html', {row:row});
+        res.render('heatmap/prueba.html', {row:row});
     });
 });
 
 app.post('/heatmap_mac', function(req, res){
 	var networkMAC= req.body.ap_mac || '';
-    db.all("SELECT lat,lon,signal_rssi FROM SeenAP where bssid='"+networkMAC+"'", function(err, row){
+    db.all("SELECT lat,lon,MAX(signal_rssi) FROM SeenAP where bssid='"+networkMAC+"' GROUP BY lat,lon", function(err, row){
+    //db.all("SELECT lat,lon,signal_rssi FROM SeenAP where bssid='"+networkMAC+"'", function(err, row){
         //console.log(row);
-        res.render('heatmap/test.html', {row:row});
+        res.render('heatmap/prueba.html', {row:row});
     });
 });
-
 
 app.get('*', function(req, res) {  
     res.sendfile('html/index.html');
