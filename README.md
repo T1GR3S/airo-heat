@@ -13,32 +13,32 @@ Repositorio del equipo T1GR3$ en el hackathon de Cybercamp 2018
 
 ### Install modification. 
 
-sudo apt-get install build-essential autoconf automake libtool pkg-config libnl-3-dev libnl-genl-3-dev libssl-dev libsqlite3-dev libpcre3-dev ethtool shtool rfkill zlib1g-dev libpcap-dev
+*sudo apt-get install build-essential autoconf automake libtool pkg-config libnl-3-dev libnl-genl-3-dev libssl-dev libsqlite3-dev libpcre3-dev ethtool shtool rfkill zlib1g-dev libpcap-dev*
 
-cd aircrack-ng
+*cd aircrack-ng*
 
-autoreconf -i
+*autoreconf -i*
 
-./configure --with-experimental
+*./configure --with-experimental*
 
-make
+*make*
 
-sudo make install
+*sudo make install*
 
-##Running example
+## Running example
 
-sudo su
+*sudo su*
 
-airmon-ng start wlan0
+*airmon-ng start wlan0*
 
-gpsd /dev/ttyUSB0
+*gpsd /dev/ttyUSB0*
 
-airodump-ng wlan0mon -w prueba --gpsd --berlin 5 --write-interval 3
+*airodump-ng wlan0mon -w prueba --gpsd --berlin 5 --write-interval 3*
 
 
-##Create Database
+## Create Database
 
-python databaseHeatMapAircrack.py <outputDB> <inputAP> <inputClient>
+*python databaseHeatMapAircrack.py <outputDB> <inputAP> <inputClient>*
 
 Donde:      	 
 
