@@ -1,12 +1,11 @@
 *.db
 config.*
 
-airo-heat-tool/.vscode
-airo-heat-tool/bin/Debug/netcoreapp2.1
-backend-dev/node_server/node_modules
-backend-dev/node_server/database.db
-backend-dev/node_server/config.js
-database.sql
+old/airo-heat-tool/.vscode
+old/airo-heat-tool/bin/Debug/netcoreapp2.1
+backend/node_modules
+backend/database.db
+backend/config.js
 
 database-dev/pruebaAircrack/
 database-dev/pruebaKismet/
