@@ -975,8 +975,7 @@ static int dump_initialize(char * prefix, int ivs_only)
 
 	if (G.output_format_csv)
 	{
-		G.output_format_seen_ap = 1;
-		G.output_format_seen_cli = 1;
+		G.output_format_gps = 1;
 		memset(ofn, 0, ofn_len);
 		snprintf(
 			ofn, ofn_len, "%s-%02d.%s", prefix, G.f_index, AIRODUMP_NG_CSV_EXT);
@@ -990,38 +989,21 @@ static int dump_initialize(char * prefix, int ivs_only)
 		}
 	}
 
-	if (G.output_format_seen_ap)
+	if (G.usegpsd) //if gps is enable output gps file
 	{
 		memset(ofn, 0, ofn_len);
 		snprintf(
-			ofn, ofn_len, "%s-%02d.ap.%s", prefix, G.f_index, AIRODUMP_NG_CSV_EXT);
+			ofn, ofn_len, "%s-%02d.%s", prefix, G.f_index, AIRODUMP_NG_GPS_CSV_EXT);
 
-		if ((G.f_aptxt = fopen(ofn, "a+")) == NULL)
+		if ((G.f_seentxt = fopen(ofn, "a+")) == NULL)
 		{
 			perror("fopen failed");
 			fprintf(stderr, "Could not create \"%s\".\n", ofn);
 			free(ofn);
 			return (1);
+		} else {
+			fprintf(G.f_seentxt,"BSSID,time,type,connected,power,lat,lon,alt \r\n");
 		}
-		fprintf(G.f_aptxt,"BSSID, time seen, Privacy, Cipher, auth, Power, ESSID, lat, lon \r\n");
-
-	}
-
-	if (G.output_format_seen_cli)
-	{
-		memset(ofn, 0, ofn_len);
-		snprintf(
-			ofn, ofn_len, "%s-%02d.cli.%s", prefix, G.f_index, AIRODUMP_NG_CSV_EXT);
-
-		if ((G.f_clitxt = fopen(ofn, "a+")) == NULL)
-		{
-			perror("fopen failed");
-			fprintf(stderr, "Could not create \"%s\".\n", ofn);
-			free(ofn);
-			return (1);
-		}
-		fprintf(G.f_clitxt,"MAC, time seen, Power, packets, BSSID, lat, lon, Probed ESSIDs\r\n");
-
 	}
 
 	/* create the output Kismet CSV file */
@@ -4417,26 +4399,22 @@ static char * format_text_for_csv(const unsigned char * input, int len)
 }
 
 
-static int dump_write_apcsv(void)
+static int dump_write_gps(void)
 {
-	int i;
 	struct tm * ltime;
 	struct AP_info * ap_cur;
 	struct ST_info * st_cur;
-	char * temp;
 
 	if (!G.record_data || !G.output_format_csv) return 0;
 
-	fseek(G.f_aptxt, 0, SEEK_SET);
-
-	//fprintf(G.f_aptxt,"BSSID, time seen, Privacy, Cipher, auth, Power, ESSID, lat, lon \r\n");
+	fseek(G.f_seentxt, 0, SEEK_SET);
 
 	ap_cur = G.ap_1st;
 
 	while (ap_cur != NULL)
 	{
 
-		if (ap_cur->nb_pkt < 2 || time(NULL) - ap_cur->tlast > G.berlin
+		if (ap_cur->nb_pkt < 2 || time(NULL) - ap_cur->tlast > (G.file_write_interval+1)
 			|| memcmp(ap_cur->bssid, BROADCAST, 6) == 0)
 		{
 			ap_cur = ap_cur->next;
@@ -4463,7 +4441,7 @@ static int dump_write_apcsv(void)
 			continue;
 		}
 
-		fprintf(G.f_aptxt,
+		fprintf(G.f_seentxt,
 				"%02X:%02X:%02X:%02X:%02X:%02X,",
 				ap_cur->bssid[0],
 				ap_cur->bssid[1],
@@ -4474,103 +4452,34 @@ static int dump_write_apcsv(void)
 
 
 		time_t rawtime;
-
 		time ( &rawtime );
 		ltime = localtime ( &rawtime );
+		fprintf(G.f_seentxt, "%lu,", (unsigned long)time(NULL)); 
+		
+		fprintf(G.f_seentxt, "ap,,"); //type ap  and connected null
 
-		fprintf(G.f_aptxt,
-				"%04d-%02d-%02d %02d:%02d:%02d,",
-				1900 + ltime->tm_year,
-				1 + ltime->tm_mon,
-				ltime->tm_mday,
-				ltime->tm_hour,
-				ltime->tm_min,
-				ltime->tm_sec);
-
-		if ((ap_cur->security & (STD_OPN | STD_WEP | STD_WPA | STD_WPA2)) != 0)
-			//fprintf(G.f_aptxt, "");
-		//else
-		{
-			if (ap_cur->security & STD_WPA2) fprintf(G.f_aptxt, "WPA2");
-			if (ap_cur->security & STD_WPA) fprintf(G.f_aptxt, "WPA");
-			if (ap_cur->security & STD_WEP) fprintf(G.f_aptxt, "WEP");
-			if (ap_cur->security & STD_OPN) fprintf(G.f_aptxt, "OPN");
-		}
-
-		fprintf(G.f_aptxt, ",");
-
-		if ((ap_cur->security
-			 & (ENC_WEP | ENC_TKIP | ENC_WRAP | ENC_CCMP | ENC_WEP104
-				| ENC_WEP40
-				| ENC_GCMP))
-			!= 0)
-			//fprintf(G.f_aptxt, "");
-		//else
-		{
-			if (ap_cur->security & ENC_CCMP) fprintf(G.f_aptxt, "CCMP");
-			if (ap_cur->security & ENC_WRAP) fprintf(G.f_aptxt, "WRAP");
-			if (ap_cur->security & ENC_TKIP) fprintf(G.f_aptxt, "TKIP");
-			if (ap_cur->security & ENC_WEP104) fprintf(G.f_aptxt, "WEP104");
-			if (ap_cur->security & ENC_WEP40) fprintf(G.f_aptxt, "WEP40");
-			if (ap_cur->security & ENC_WEP) fprintf(G.f_aptxt, "WEP");
-			if (ap_cur->security & ENC_WEP) fprintf(G.f_aptxt, "GCMP");
-		}
-
-		fprintf(G.f_aptxt, ",");
-
-		if ((ap_cur->security & (AUTH_OPN | AUTH_PSK | AUTH_MGT)) != 0)
-			//fprintf(G.f_aptxt, "");
-		//else
-		{
-			if (ap_cur->security & AUTH_MGT) fprintf(G.f_aptxt, "MGT");
-			if (ap_cur->security & AUTH_PSK)
-			{
-				if (ap_cur->security & STD_WEP)
-					fprintf(G.f_aptxt, "SKA");
-				else
-					fprintf(G.f_aptxt, "PSK");
-			}
-			if (ap_cur->security & AUTH_OPN) fprintf(G.f_aptxt, "OPN");
-		}
-
-		fprintf(G.f_aptxt,
-				",%3d,",
+		fprintf(G.f_seentxt,
+				"%3d,",
 				ap_cur->avg_power);
 
 
-		if (verifyssid(ap_cur->essid))
-			fprintf(G.f_aptxt, "%s,", ap_cur->essid);
-		else
-		{
-			temp = format_text_for_csv(ap_cur->essid, ap_cur->ssid_length);
-			fprintf(G.f_aptxt, "%s,", temp);
-			free(temp);
-		}
-
-		if (ap_cur->key != NULL)
-		{
-			for (i = 0; i < (int) strlen(ap_cur->key); i++)
-			{
-				fprintf(G.f_aptxt, "%02X", ap_cur->key[i]);
-				if (i < (int) (strlen(ap_cur->key) - 1)) fprintf(G.f_aptxt, ":");
-			}
-		}
-
-
-		fprintf(G.f_aptxt,
-				 "%8.9f,",
+		fprintf(G.f_seentxt,
+				 "%8.5f,",
 				 G.gps_loc[0]);
 
-		fprintf(G.f_aptxt,
-				 "%8.9f",
+		fprintf(G.f_seentxt,
+				 "%8.5f,",
 				 G.gps_loc[1]);
 
-		fprintf(G.f_aptxt, "\r\n");
+		fprintf(G.f_seentxt,
+				 "%8.5f",
+				 G.gps_loc[4]);
+
+
+		fprintf(G.f_seentxt, "\r\n");
 
 		ap_cur = ap_cur->next;
 	}
-
-	//fprintf(G.f_clitxt,"\r\nMAC, time seen, Power, packets, BSSID, lat, lon, Probed ESSIDs\r\n");
 
 	st_cur = G.st_1st;
 
@@ -4579,13 +4488,13 @@ static int dump_write_apcsv(void)
 		ap_cur = st_cur->base;
 
 		if (st_cur->base != ap_cur
-					|| time(NULL) - st_cur->tlast > G.berlin)
+					|| time(NULL) - st_cur->tlast > (G.file_write_interval+1))
 				{
 					st_cur = st_cur->next;
 					continue;
 				}
 
-		fprintf(G.f_clitxt,
+		fprintf(G.f_seentxt,
 				"%02X:%02X:%02X:%02X:%02X:%02X,",
 				st_cur->stmac[0],
 				st_cur->stmac[1],
@@ -4596,26 +4505,16 @@ static int dump_write_apcsv(void)
 
 		//ltime = localtime(time(NULL));
 		time_t rawtime;
-
 		time ( &rawtime );
 		ltime = localtime ( &rawtime );
+		fprintf(G.f_seentxt, "%lu,", (unsigned long)time(NULL)); 
 		
-
-		fprintf(G.f_clitxt,
-				"%04d-%02d-%02d %02d:%02d:%02d,",
-				1900 + ltime->tm_year,
-				1 + ltime->tm_mon,
-				ltime->tm_mday,
-				ltime->tm_hour,
-				ltime->tm_min,
-				ltime->tm_sec);
-
-		fprintf(G.f_clitxt, "%3d,%8lu,", st_cur->power, st_cur->nb_pkt);
+		fprintf(G.f_seentxt, "client,"); //type client
 
 		if (!memcmp(ap_cur->bssid, BROADCAST, 6))
-			fprintf(G.f_clitxt, "(not associated),");
+			fprintf(G.f_seentxt, "(not associated),");
 		else
-			fprintf(G.f_clitxt,
+			fprintf(G.f_seentxt,
 					"%02X:%02X:%02X:%02X:%02X:%02X,",
 					ap_cur->bssid[0],
 					ap_cur->bssid[1],
@@ -4625,60 +4524,37 @@ static int dump_write_apcsv(void)
 					ap_cur->bssid[5]);
 
 
-		fprintf(G.f_clitxt,
+		fprintf(G.f_seentxt, "%3d,", st_cur->power);
+
+		fprintf(G.f_seentxt,
 				 "%8.5f,",
 				 G.gps_loc[0]);
 
-		fprintf(G.f_clitxt,
+		fprintf(G.f_seentxt,
 				 "%8.5f,",
 				 G.gps_loc[1]);
-		int probes_written = 0;
-		int n;
-		for (i = 0, n = 0; i < NB_PRB; i++)
-		{
-			if (st_cur->ssid_length[i] == 0) continue;
 
-			if (verifyssid((const unsigned char *) st_cur->probes[i]))
-			{
-				temp = (char *) calloc(
-					1, (st_cur->ssid_length[i] + 1) * sizeof(char));
-				memcpy(temp, st_cur->probes[i], st_cur->ssid_length[i] + 1);
-			}
-			else
-			{
-				temp = format_text_for_csv((unsigned char *) st_cur->probes[i],
-										   st_cur->ssid_length[i]);
-			}
+		fprintf(G.f_seentxt,
+				 "%8.5f,",
+				 G.gps_loc[4]);
 
-			if (probes_written == 0)
-			{
-				fprintf(G.f_clitxt, "%s", temp);
-				probes_written = 1;
-			}
-			else
-			{
-				fprintf(G.f_clitxt, ",%s", temp);
-			}
 
-			free(temp);
-		}
-
-		fprintf(G.f_clitxt, "\r\n");
+		fprintf(G.f_seentxt, "\r\n");
 
 		st_cur = st_cur->next;
 	}
 
 
-	//fprintf(G.f_clitxt, "\r\n");
-	fflush(G.f_clitxt);
-	fflush(G.f_aptxt);
+	//fprintf(G.f_seentxt, "\r\n");
+	fflush(G.f_seentxt);
+	fflush(G.f_seentxt);
 	
 	return 0;
 }
 
 static int dump_write_csv(void)
 {
-	dump_write_apcsv();
+	dump_write_gps();
 	int i, n, probes_written;
 	struct tm * ltime;
 	struct AP_info * ap_cur;
@@ -8415,6 +8291,7 @@ int main(int argc, char * argv[])
 
 			tt1 = time(NULL);
 			if (G.output_format_csv) dump_write_csv();
+			if (G.usegpsd) dump_write_gps();
 			if (G.output_format_kismet_csv) dump_write_kismet_csv();
 			if (G.output_format_kismet_netxml) dump_write_kismet_netxml();
 		}
@@ -8734,6 +8611,7 @@ int main(int argc, char * argv[])
 	if (G.record_data)
 	{
 		if (G.output_format_csv) dump_write_csv();
+		if (G.usegpsd) dump_write_gps();
 		if (G.output_format_kismet_csv) dump_write_kismet_csv();
 		if (G.output_format_kismet_netxml) dump_write_kismet_netxml();
 

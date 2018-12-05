@@ -9,3 +9,5 @@ backend/config.js
 
 database-dev/pruebaAircrack/
 database-dev/pruebaKismet/
+
+*.sqlite

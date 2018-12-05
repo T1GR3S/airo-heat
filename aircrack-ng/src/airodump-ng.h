@@ -103,6 +103,7 @@ char *
 get_manufacturer(unsigned char mac0, unsigned char mac1, unsigned char mac2);
 
 #define AIRODUMP_NG_CSV_EXT "csv"
+#define AIRODUMP_NG_GPS_CSV_EXT "gps.csv"
 #define KISMET_CSV_EXT "kismet.csv"
 #define KISMET_NETXML_EXT "kismet.netxml"
 #define AIRODUMP_NG_GPS_EXT "gps"
@@ -377,8 +378,7 @@ struct globals
 
 	int f_index; /* outfiles index       */
 	FILE * f_txt; /* output csv file      */
-	FILE * f_aptxt; /* output ap csv file      */
-	FILE * f_clitxt; /* output client csv file      */
+	FILE * f_seentxt; /* output seen csv file      */
 	FILE * f_kis; /* output kismet csv file      */
 	FILE * f_kis_xml; /* output kismet netxml file */
 	FILE * f_gps; /* output gps file      */
@@ -486,8 +486,7 @@ struct globals
 
 	int output_format_pcap;
 	int output_format_csv;
-	int output_format_seen_ap;
-	int output_format_seen_cli;
+	int output_format_gps;
 	int output_format_kismet_csv;
 	int output_format_kismet_netxml;
 	pthread_t input_tid;
