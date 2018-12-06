@@ -9,13 +9,12 @@ if len(sys.argv) > 1:
         print('''
         Usage: databaseHeatMapAircrack.py <outputDB> <aircrack output without format>
         \t outputDB: Database de salida SQLite3
-        \t inputAP: Fichero de aircrack modificado con los ap (formato .ap.csv)
- los clientes (formato .cli.csv)
+        \t aircrack output without format
         ''')
         sys.exit(0) 
 
 if len(sys.argv) < 3:
-    print('databaseHeatMapAircrack.py <outputDB> <inputAP> <inputClient>')
+    print('databaseHeatMapAircrack.py <outputDB> <aircrack output without format>')
     sys.exit(2)
 
 db = sqlite3.connect(sys.argv[1])
@@ -111,9 +110,8 @@ with open(sys.argv[2]+".kismet.csv") as csv_file:
     line_count = 0
     for row in csv_reader:
         if len(row)>0 and row[0]!="Network":
-            print(row[3] + " "+row[2])
             try:
-                cursor.execute('''INSERT INTO AP VALUES(?,?,?,?,?,?,?,?,?,?)''', (row[3], row[2], 'unknown', row[5], 0,'', row[7] ,  row[16] , 0, 0))
+                cursor.execute('''INSERT INTO AP VALUES(?,?,?,?,?,?,?,?,?,?)''', (row[3], row[2], '', row[5], 0,'', row[7] , row[16] , 0, 0)) #manuf y carrier implementar
             except sqlite3.IntegrityError:
                 print('Record already exists')
 
@@ -128,7 +126,7 @@ with open(sys.argv[2]+".csv") as csv_file:
             client=True
         elif len(row)>0 and client:
             try:
-                cursor.execute('''INSERT INTO client VALUES(?,?,?,?,?,?)''', (row[0], '', 'unknown', 'wifi',row[4], 'aircrack-ng'))
+                cursor.execute('''INSERT INTO client VALUES(?,?,?,?,?,?)''', (row[0], '', '', 'W',row[4], 'Misc')) #manuf implementar
             except sqlite3.IntegrityError:
                 print('Record already exists')
             
@@ -157,16 +155,22 @@ with open(sys.argv[2]+".gps.csv") as csv_file:
         if row[0]!="BSSID":
             if row[2] == "client":
                 try:
-                    cursor.execute('''INSERT INTO client VALUES(?,?,?,?,?,?)''', (row[0], '', 'unknown', 'wifi',-1, 'aircrack-ng'))
+                    cursor.execute('''INSERT INTO client VALUES(?,?,?,?,?,?)''', (row[0], '', '', 'W',-1, 'aircrack-ng'))
                 except sqlite3.IntegrityError:
                     print('Record already exists')
 
                 try:
-                    cursor.execute('''INSERT INTO SeenClient VALUES(?,?,?,?,?,?,?)''', (row[0], row[1], 'aircrack-ng', row[4], row[5], row[6], row[7]))
+                    cursor.execute('''INSERT INTO SeenClient VALUES(?,?,?,?,?,?,?)''', (row[0], row[1], 'aircrack-ng', row[4], row[5], row[6], row[7])) 
                 except sqlite3.IntegrityError:
                     print('Record already exists')
 
             if row[2] == "ap":
+
+                try:
+                    cursor.execute('''INSERT INTO AP VALUES(?,?,?,?,?,?,?,?,?,?)''', (row[0], '', '', 0, 0,'', '' , 0 , 0, 0)) #manuf y carrier implementar
+                except sqlite3.IntegrityError:
+                    print('Record already exists')
+
                 try:
                     cursor.execute('''INSERT INTO SeenAp VALUES(?,?,?,?,?,?,?,?)''', (row[0], row[1], 'aircrack-ng', row[4], row[5], row[6], row[7], 0))
                 except sqlite3.IntegrityError:

@@ -11,3 +11,7 @@ database-dev/pruebaAircrack/
 database-dev/pruebaKismet/
 
 *.sqlite
+
+*.csv
+
+*.csv.gz

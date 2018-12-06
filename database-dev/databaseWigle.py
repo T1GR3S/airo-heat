@@ -101,14 +101,13 @@ try:
 
     #Table Probe
     cursor.execute('''
-	    CREATE TABLE IF NOT EXISTS Probe
+        CREATE TABLE IF NOT EXISTS Probe
         (
         mac TEXT NOT NULL,
         ssid TEXT NOT NULL,
-        max_rate REAL,
-        packets int,
+        time datetime,
         CONSTRAINT Key5 PRIMARY KEY (mac,ssid),
-        CONSTRAINT Relationship6 FOREIGN KEY (mac) REFERENCES Client (mac)
+        CONSTRAINT ProbesSent FOREIGN KEY (mac) REFERENCES Client (mac)
         );
 	''')
 
@@ -144,12 +143,12 @@ cursor. execute(''' INSERT INTO SeenAp
             SELECT bssid, time FROM inputDB.location GROUP BY bssid, time HAVING COUNT(*) = 1 
             )
     ) 
-    SELECT bssid, time, 'wigle' as tool, level as signal_rssi, lat, lon, altitude as alt, '' as bsstimestamp 
+    SELECT bssid, time/1000, 'wigle' as tool, level as signal_rssi, lat, lon, altitude as alt, '' as bsstimestamp 
     FROM clean_location 
-    WHERE bssid IN (
+    WHERE time!= 0 AND bssid IN (
         SELECT bssid from inputDB.network where type="W"
     );
-''')
+''')#time to seconds and time !=0
 
 #Table Client
 cursor.execute(''' INSERT INTO Client
@@ -167,12 +166,12 @@ cursor. execute(''' INSERT INTO SeenClient
             SELECT bssid, time FROM inputDB.location GROUP BY bssid, time HAVING COUNT(*) = 1 
             )
     ) 
-    SELECT bssid as mac, time, 'wigle' as tool, level as signal_rssi, lat, lon, altitude as alt 
+    SELECT bssid as mac, time/1000, 'wigle' as tool, level as signal_rssi, lat, lon, altitude as alt 
     FROM clean_location 
-    WHERE bssid IN (
+    WHERE time!= 0 AND bssid IN (
         SELECT bssid from inputDB.network where type="B" OR type = "E"
     );
-''')
+''') #time to seconds and time !=0
 output_db.commit() 
 output_db.close()
 
