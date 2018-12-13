@@ -47,15 +47,14 @@ https://www.youtube.com/watch?v=0DEitQNn7GQ
 
 *python databaseHeatMapAircrack.py <outputDB> <inputAP> <inputClient>*
 
-Donde:      	 
-
+Donde:
         outputDB: Base de datos de salida SQLite3
 
-     	inputAP: Fichero de aircrack modificado con los ap (formato .ap.csv)
+	inputAP: Fichero de aircrack modificado con los ap (formato .ap.csv)
 
-      	inputClient: Fichero de aircrack modificado con los clientes (formato .cli.csv)
+	inputClient: Fichero de aircrack modificado con los clientes (formato .cli.csv)
 
-      	
+
 ---------------------------------------------
 
 ## Node Server 
