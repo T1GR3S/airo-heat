@@ -93,13 +93,13 @@ Visit localhost:3000
 
 ---------------------------------------------
 
-# Authors
+# Authors (alphabetic order)
 
 - Silvia Nerea Anguita de Blas (@silvianerea)
 
-- Ricardo José Ruiz Fernández (@ricardojoserf)
+- Raúl Calvo Laorden (@raulcalvolaorden)
 
 - Elena del Portillo Peña (@elenadpp)
 
-- Raúl Calvo Laorden (@raulcalvolaorden)
+- Ricardo José Ruiz Fernández (@ricardojoserf)
 
