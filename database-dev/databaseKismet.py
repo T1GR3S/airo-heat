@@ -1,25 +1,26 @@
-import csv
 import xml.etree.ElementTree
 import sqlite3
 import sys
 from lxml import etree
 
 if len(sys.argv) > 1:
-    if sys.argv[1] == "-h" or sys.argv[1] == "--help":
-        print('''
-        Usage: databaseHeatMapAircrack.py <outputDB> <aircrack output without format>
+    if sys.argv[1] == "-h" or sys.argv[1] =="--help":
+        print '''
+        Usage: databaseHeatMap.py <outputDB> <inputKismet>
         \t outputDB: Database de salida SQLite3
-        \t aircrack output without format
-        ''')
+        \t inputAP: Fichero de kismet con los ap  y gps (formato .gpsxml)
+        '''
         sys.exit(0)
 
+
 if len(sys.argv) < 3:
-    print('databaseHeatMapAircrack.py <outputDB> <aircrack output without format>')
+    print 'databaseHeatMap.py <outputDB> <inputKismet>'
     sys.exit(2)
+    
+    
 
 db = sqlite3.connect(sys.argv[1])
-db.text_factory = str
-
+# Get a cursor object
 cursor = db.cursor()
 
 try:
@@ -103,12 +104,10 @@ CREATE TABLE IF NOT EXISTS Probe
     db.commit()
 except sqlite3.IntegrityError:
     print('Record already exists')
+    
 
 
-# ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-
-doc = etree.parse(sys.argv[2]+".kismet.netxml")
+doc = etree.parse(sys.argv[2]+".netxml")
 raiz = doc.getroot()
 for wireless in raiz:
     if wireless.get("type") == "probe":
@@ -140,15 +139,19 @@ for wireless in raiz:
         manuf = wireless.find("manuf").text
         channel = wireless.find("channel").text
         freqmhz = wireless.find("freqmhz").text
-        carrier = wireless.find("carrier").text
+        if wireless.find("carrier") != None:
+            carrier = wireless.find("carrier").text
+        else: 
+            carrier = ""
         manuf = wireless.find("manuf").text
         if wireless.find("SSID").find("encryption") != None:
             encryption = wireless.find("SSID").find("encryption").text
         else:
             encryption = ""
-
-        packetsT = wireless[8].find("total").text
-
+        if wireless[8].find("total") != None:
+            packetsT = wireless[8].find("total").text
+        else:
+            packetsT = ""
         try:
             cursor.execute('''INSERT INTO AP VALUES(?,?,?,?,?,?,?,?,?,?)''', (bssid,
                                                                               essid, manuf, channel, freqmhz, carrier, encryption, packetsT, 0, 0))
@@ -176,92 +179,32 @@ for wireless in raiz:
             except sqlite3.IntegrityError:
                 print('Record already exists')
 
-# client ./
-# ap ./
-# probes ./
-# connections ./
 
 
-# ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+e = xml.etree.ElementTree.parse(sys.argv[2]+".gpsxml").getroot()
 
+for atype in e.findall('gps-point'):
+    bssid = atype.get('bssid')
+    source = atype.get('source')
+    timesec = atype.get('time-sec')
+    timeusec = atype.get('time-usec')
+    alt = atype.get('alt')
+    lat = atype.get('lat')
+    lon = atype.get('lon')
+    signal_dbm = atype.get('signal_dbm')
+    #eliminamos mac error y mac falsa de kismet
+    if bssid != "00:00:00:00:00:00" and bssid != "GP:SD:TR:AC:KL:OG":
+        print(bssid)
+        try:
+            cursor.execute('''INSERT INTO AP VALUES(?,?,?,?,?,?,?,?,?,?)''',
+                           (bssid, 'unknow', '', 0, 0, '', '', 0, 0, 0))
+        except sqlite3.IntegrityError:
+            print('Record already exists')
 
-with open(sys.argv[2]+".kismet.csv") as csv_file:
-    csv_reader = csv.reader(csv_file, delimiter=';')
-    line_count = 0
-    for row in csv_reader:
-        if len(row) > 0 and row[0] != "Network":
-            try:
-                cursor.execute('''INSERT INTO AP VALUES(?,?,?,?,?,?,?,?,?,?)''', (
-                    row[3], row[2], '', row[5], 0, '', row[7], row[16], 0, 0))  # manuf y carrier implementar
-            except sqlite3.IntegrityError:
-                print('Record already exists')
-
-db.commit()
-
-with open(sys.argv[2]+".csv") as csv_file:
-    csv_reader = csv.reader(csv_file, delimiter=',')
-    line_count = 0
-    client = False
-    for row in csv_reader:
-        if len(row) > 0 and row[0] == "Station MAC":
-            client = True
-        elif len(row) > 0 and client:
-            try:
-                cursor.execute('''INSERT INTO client VALUES(?,?,?,?,?,?)''',
-                               (row[0], '', '', 'W', row[4], 'Misc'))  # manuf implementar
-            except sqlite3.IntegrityError:
-                print('Record already exists')
-
-            if row[5] != " (not associated) ":
-                try:
-                    cursor.execute(
-                        '''INSERT INTO connected VALUES(?,?)''', (row[5],  row[0]))
-                except sqlite3.IntegrityError:
-                    print('Record already exists')
-
-            contador = 6
-            while contador < len(row) and row[contador] != "":
-                try:
-                    cursor.execute(
-                        '''INSERT INTO Probe VALUES(?,?,?)''', (row[0],  row[contador], 0))
-                except sqlite3.IntegrityError:
-                    print('Record already exists')
-                contador += 1
-
-
-db.commit()
-
-
-with open(sys.argv[2]+".gps.csv") as csv_file:
-    csv_reader = csv.reader(csv_file, delimiter=',')
-    line_count = 0
-    for row in csv_reader:
-        if row[0] != "BSSID":
-            if row[2] == "client":
-                try:
-                    cursor.execute('''INSERT INTO client VALUES(?,?,?,?,?,?)''',
-                                   (row[0], '', '', 'W', -1, 'aircrack-ng'))
-                except sqlite3.IntegrityError:
-                    print('Record already exists')
-
-                try:
-                    cursor.execute('''INSERT INTO SeenClient VALUES(?,?,?,?,?,?,?)''',
-                                   (row[0], row[1], 'aircrack-ng', row[4], row[5], row[6], row[7]))
-                except sqlite3.IntegrityError:
-                    print('Record already exists')
-
-            if row[2] == "ap":
-
-                try:
-                    cursor.execute('''INSERT INTO AP VALUES(?,?,?,?,?,?,?,?,?,?)''', (
-                        row[0], '', '', 0, 0, '', '', 0, 0, 0))  # manuf y carrier implementar
-                except sqlite3.IntegrityError:
-                    print('Record already exists')
-
-                try:
-                    cursor.execute('''INSERT INTO SeenAp VALUES(?,?,?,?,?,?,?,?)''', (
-                        row[0], row[1], 'aircrack-ng', row[4], row[5], row[6], row[7], 0))
-                except sqlite3.IntegrityError:
-                    print('Record already exists')
+        try:
+            cursor.execute('''INSERT INTO SeenAP VALUES(?,?,?,?,?,?,?,?)''',
+                           (bssid, timesec, 'Kismet', signal_dbm, lat, lon, alt, 0))
+        except sqlite3.IntegrityError:
+            print('Record already exists')
 
 db.commit()

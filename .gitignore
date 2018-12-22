@@ -15,3 +15,5 @@ database-dev/pruebaKismet/
 *.csv
 
 *.csv.gz
+
+database-dev/prueba/
