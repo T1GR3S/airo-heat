@@ -3,6 +3,7 @@ import xml.etree.ElementTree
 import sqlite3
 import sys
 from lxml import etree
+import os
 
 if len(sys.argv) > 1:
     if sys.argv[1] == "-h" or sys.argv[1] == "--help":
@@ -108,160 +109,168 @@ except sqlite3.IntegrityError:
 # ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
-doc = etree.parse(sys.argv[2]+".kismet.netxml")
-raiz = doc.getroot()
-for wireless in raiz:
-    if wireless.get("type") == "probe":
-        bssid = wireless.find("BSSID").text
-        manuf = wireless.find("manuf").text
-        packetsT = wireless.find("packets").find("total").text
-        #print bssid, manuf, "W", packetsT
-        try:
-            cursor.execute('''INSERT INTO client VALUES(?,?,?,?,?,?)''',
-                           (bssid, '', manuf, 'W', packetsT, 'Misc'))
-        except sqlite3.IntegrityError:
-            print('Record already exists')
+exists = os.path.isfile(sys.argv[2]+".kismet.netxml")
+if exists:
+    doc = etree.parse(sys.argv[2]+".kismet.netxml")
+    raiz = doc.getroot()
+    for wireless in raiz:
+        if wireless.get("type") == "probe":
+            bssid = wireless.find("BSSID").text
+            manuf = wireless.find("manuf").text
+            packetsT = wireless.find("packets").find("total").text
+            #print bssid, manuf, "W", packetsT
+            try:
+                cursor.execute('''INSERT INTO client VALUES(?,?,?,?,?,?)''',
+                            (bssid, '', manuf, 'W', packetsT, 'Misc'))
+            except sqlite3.IntegrityError:
+                print('Record already exists')
 
-        # probe
-        if wireless.find("wireless-client").find("SSID").find("ssid") != None:
-            essidProbe = wireless.find("wireless-client").findall("SSID")
-            for ssid in essidProbe:
-                #print bssid, ssid.find("ssid").text
+            # probe
+            if wireless.find("wireless-client").find("SSID").find("ssid") != None:
+                essidProbe = wireless.find("wireless-client").findall("SSID")
+                for ssid in essidProbe:
+                    #print bssid, ssid.find("ssid").text
+                    try:
+                        cursor.execute('''INSERT INTO Probe VALUES(?,?,?)''',
+                                    (bssid, ssid.find("ssid").text, 0))
+                    except sqlite3.IntegrityError:
+                        print('Record already exists')
+
+        elif wireless.get("type") == "infrastructure":
+            # ap
+            essid = wireless.find("SSID").find("essid").text
+            bssid = wireless.find("BSSID").text
+            manuf = wireless.find("manuf").text
+            channel = wireless.find("channel").text
+            freqmhz = wireless.find("freqmhz").text
+            carrier = wireless.find("carrier").text
+            manuf = wireless.find("manuf").text
+            if wireless.find("SSID").find("encryption") != None:
+                encryption = wireless.find("SSID").find("encryption").text
+            else:
+                encryption = ""
+
+            packetsT = wireless[8].find("total").text
+
+            try:
+                cursor.execute('''INSERT INTO AP VALUES(?,?,?,?,?,?,?,?,?,?)''', (bssid,
+                                                                                essid, manuf, channel, freqmhz, carrier, encryption, packetsT, 0, 0))
+            except sqlite3.IntegrityError:
+                print('Record already exists')
+            #print bssid, essid, manuf, channel,freqmhz, carrier, encryption, packetsT
+
+            # client
+            clients = wireless.findall("wireless-client")
+            for client in clients:
+                clientMac = client.find("client-mac").text
+                manuf = client.find("client-manuf").text
+                packetsT = client.find("packets").find("total").text
+                #print clientMac, manuf, "W", packetsT
                 try:
-                    cursor.execute('''INSERT INTO Probe VALUES(?,?,?)''',
-                                   (bssid, ssid.find("ssid").text, 0))
+                    cursor.execute('''INSERT INTO client VALUES(?,?,?,?,?,?)''',
+                                (clientMac, '', manuf, 'W', packetsT, 'Misc'))
+                except sqlite3.IntegrityError:
+                    print('Record already exists')
+                # connected
+                print bssid, clientMac
+                try:
+                    cursor.execute(
+                        '''INSERT INTO connected VALUES(?,?)''', (bssid,  clientMac))
                 except sqlite3.IntegrityError:
                     print('Record already exists')
 
-    elif wireless.get("type") == "infrastructure":
-        # ap
-        essid = wireless.find("SSID").find("essid").text
-        bssid = wireless.find("BSSID").text
-        manuf = wireless.find("manuf").text
-        channel = wireless.find("channel").text
-        freqmhz = wireless.find("freqmhz").text
-        carrier = wireless.find("carrier").text
-        manuf = wireless.find("manuf").text
-        if wireless.find("SSID").find("encryption") != None:
-            encryption = wireless.find("SSID").find("encryption").text
-        else:
-            encryption = ""
-
-        packetsT = wireless[8].find("total").text
-
-        try:
-            cursor.execute('''INSERT INTO AP VALUES(?,?,?,?,?,?,?,?,?,?)''', (bssid,
-                                                                              essid, manuf, channel, freqmhz, carrier, encryption, packetsT, 0, 0))
-        except sqlite3.IntegrityError:
-            print('Record already exists')
-        #print bssid, essid, manuf, channel,freqmhz, carrier, encryption, packetsT
-
-        # client
-        clients = wireless.findall("wireless-client")
-        for client in clients:
-            clientMac = client.find("client-mac").text
-            manuf = client.find("client-manuf").text
-            packetsT = client.find("packets").find("total").text
-            #print clientMac, manuf, "W", packetsT
-            try:
-                cursor.execute('''INSERT INTO client VALUES(?,?,?,?,?,?)''',
-                               (clientMac, '', manuf, 'W', packetsT, 'Misc'))
-            except sqlite3.IntegrityError:
-                print('Record already exists')
-            # connected
-            print bssid, clientMac
-            try:
-                cursor.execute(
-                    '''INSERT INTO connected VALUES(?,?)''', (bssid,  clientMac))
-            except sqlite3.IntegrityError:
-                print('Record already exists')
-
-# client ./
-# ap ./
-# probes ./
-# connections ./
+    # client ./
+    # ap ./
+    # probes ./
+    # connections ./
 
 
 # ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-
-with open(sys.argv[2]+".kismet.csv") as csv_file:
-    csv_reader = csv.reader(csv_file, delimiter=';')
-    line_count = 0
-    for row in csv_reader:
-        if len(row) > 0 and row[0] != "Network":
-            try:
-                cursor.execute('''INSERT INTO AP VALUES(?,?,?,?,?,?,?,?,?,?)''', (
-                    row[3], row[2], '', row[5], 0, '', row[7], row[16], 0, 0))  # manuf y carrier implementar
-            except sqlite3.IntegrityError:
-                print('Record already exists')
-
-db.commit()
-
-with open(sys.argv[2]+".csv") as csv_file:
-    csv_reader = csv.reader(csv_file, delimiter=',')
-    line_count = 0
-    client = False
-    for row in csv_reader:
-        if len(row) > 0 and row[0] == "Station MAC":
-            client = True
-        elif len(row) > 0 and client:
-            try:
-                cursor.execute('''INSERT INTO client VALUES(?,?,?,?,?,?)''',
-                               (row[0], '', '', 'W', row[4], 'Misc'))  # manuf implementar
-            except sqlite3.IntegrityError:
-                print('Record already exists')
-
-            if row[5] != " (not associated) ":
-                try:
-                    cursor.execute(
-                        '''INSERT INTO connected VALUES(?,?)''', (row[5],  row[0]))
-                except sqlite3.IntegrityError:
-                    print('Record already exists')
-
-            contador = 6
-            while contador < len(row) and row[contador] != "":
-                try:
-                    cursor.execute(
-                        '''INSERT INTO Probe VALUES(?,?,?)''', (row[0],  row[contador], 0))
-                except sqlite3.IntegrityError:
-                    print('Record already exists')
-                contador += 1
-
-
-db.commit()
-
-
-with open(sys.argv[2]+".log.csv") as csv_file:
-    csv_reader = csv.reader(csv_file, delimiter=',')
-    line_count = 0
-    for row in csv_reader:
-        if row[0] != "LocalTime":
-            if len(row)>=10 and row[10] == "Client":
-                try:
-                    cursor.execute('''INSERT INTO client VALUES(?,?,?,?,?,?)''',
-                                   (row[3], '', '', 'W', -1, 'Misc'))
-                except sqlite3.IntegrityError:
-                    print('Record already exists')
-
-                try:
-                    cursor.execute('''INSERT INTO SeenClient VALUES(?,?,?,?,?,?,?)''',
-                                   (row[3], row[0], 'aircrack-ng', row[4], row[6], row[7], '0.0'))
-                except sqlite3.IntegrityError:
-                    print('Record already exists')
-
-            if len(row)>=10 and row[10] == "AP":
-
+exists = os.path.isfile(sys.argv[2]+".kismet.csv")
+if exists:
+    with open(sys.argv[2]+".kismet.csv") as csv_file:
+        csv_reader = csv.reader(csv_file, delimiter=';')
+        line_count = 0
+        for row in csv_reader:
+            if len(row) > 0 and row[0] != "Network":
                 try:
                     cursor.execute('''INSERT INTO AP VALUES(?,?,?,?,?,?,?,?,?,?)''', (
-                        row[3], row[2], '', 0, 0, '', '', 0, 0, 0))  # manuf y carrier implementar
+                        row[3], row[2], '', row[5], 0, '', row[7], row[16], 0, 0))  # manuf y carrier implementar
                 except sqlite3.IntegrityError:
                     print('Record already exists')
 
+db.commit()
+
+exists = os.path.isfile(sys.argv[2]+".csv")
+if exists:
+    with open(sys.argv[2]+".csv") as csv_file:
+        csv_reader = csv.reader(csv_file, delimiter=',')
+        line_count = 0
+        client = False
+        for row in csv_reader:
+            if len(row) > 0 and row[0] == "Station MAC":
+                client = True
+            elif len(row) > 0 and client:
                 try:
-                    cursor.execute('''INSERT INTO SeenAp VALUES(?,?,?,?,?,?,?,?)''', (
-                        row[3], row[0], 'aircrack-ng', row[4], row[6], row[7], '0.0', 0))
+                    cursor.execute('''INSERT INTO client VALUES(?,?,?,?,?,?)''',
+                                (row[0], '', 'Unknown', 'W', row[4], 'Misc'))  # manuf implementar
                 except sqlite3.IntegrityError:
                     print('Record already exists')
+
+                if row[5] != " (not associated) ":
+                    try:
+                        cursor.execute(
+                            '''INSERT INTO connected VALUES(?,?)''', (row[5],  row[0]))
+                    except sqlite3.IntegrityError:
+                        print('Record already exists')
+
+                contador = 6
+                while contador < len(row) and row[contador] != "":
+                    try:
+                        cursor.execute(
+                            '''INSERT INTO Probe VALUES(?,?,?)''', (row[0],  row[contador], 0))
+                    except sqlite3.IntegrityError:
+                        print('Record already exists')
+                    contador += 1
+
+
+db.commit()
+
+
+exists = os.path.isfile(sys.argv[2]+".log.csv")
+if exists:
+    with open(sys.argv[2]+".log.csv") as csv_file:
+        csv_reader = csv.reader(csv_file, delimiter=',')
+        line_count = 0
+        for row in csv_reader:
+            if row[0] != "LocalTime":
+                if len(row)>=10 and row[10] == "Client":
+                    try:
+                        cursor.execute('''INSERT INTO client VALUES(?,?,?,?,?,?)''',
+                                    (row[3], '', 'Unknown', 'W', -1, 'Misc'))
+                    except sqlite3.IntegrityError:
+                        print('Record already exists')
+
+                    try:
+                        cursor.execute('''INSERT INTO SeenClient VALUES(?,?,?,?,?,?,?)''',
+                                    (row[3], row[0], 'aircrack-ng', row[4], row[6], row[7], '0.0'))
+                    except sqlite3.IntegrityError:
+                        print('Record already exists')
+
+                if len(row)>=10 and row[10] == "AP":
+
+                    try:
+                        cursor.execute('''INSERT INTO AP VALUES(?,?,?,?,?,?,?,?,?,?)''', (
+                            row[3], row[2], '', 0, 0, '', '', 0, 0, 0))  # manuf y carrier implementar
+                    except sqlite3.IntegrityError:
+                        print('Record already exists')
+
+                    try:
+                if row[6] != 0.0:
+                            cursor.execute('''INSERT INTO SeenAp VALUES(?,?,?,?,?,?,?,?)''', (
+                            row[3], row[0], 'aircrack-ng', row[4], row[6], row[7], '0.0', 0))
+                    except sqlite3.IntegrityError:
+                        print('Record already exists')
 
 db.commit()
