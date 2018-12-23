@@ -253,7 +253,8 @@ if exists:
                         print('Record already exists')
 
                     try:
-                        cursor.execute('''INSERT INTO SeenClient VALUES(?,?,?,?,?,?,?)''',
+                        if row[6] != 0.0:
+                            cursor.execute('''INSERT INTO SeenClient VALUES(?,?,?,?,?,?,?)''',
                                     (row[3], row[0], 'aircrack-ng', row[4], row[6], row[7], '0.0'))
                     except sqlite3.IntegrityError:
                         print('Record already exists')
@@ -267,9 +268,8 @@ if exists:
                         print('Record already exists')
 
                     try:
-                if row[6] != 0.0:
-                            cursor.execute('''INSERT INTO SeenAp VALUES(?,?,?,?,?,?,?,?)''', (
-                            row[3], row[0], 'aircrack-ng', row[4], row[6], row[7], '0.0', 0))
+                        if row[6] != 0.0:
+                            cursor.execute('''INSERT INTO SeenAp VALUES(?,?,?,?,?,?,?,?)''', (row[3], row[0], 'aircrack-ng', row[4], row[6], row[7], '0.0', 0))
                     except sqlite3.IntegrityError:
                         print('Record already exists')
 
