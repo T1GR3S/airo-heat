@@ -1,9 +1,17 @@
+# -*- coding: utf-8 -*-
 import csv
 import xml.etree.ElementTree
 import sqlite3
 import sys
 from lxml import etree
 import os
+
+#test fix xml error
+import codecs
+
+
+reload(sys)
+sys.setdefaultencoding('utf8')
 
 if len(sys.argv) > 1:
     if sys.argv[1] == "-h" or sys.argv[1] == "--help":
@@ -112,6 +120,7 @@ except sqlite3.IntegrityError:
 exists = os.path.isfile(sys.argv[2]+".kismet.netxml")
 if exists:
     doc = etree.parse(sys.argv[2]+".kismet.netxml")
+
     raiz = doc.getroot()
     for wireless in raiz:
         if wireless.get("type") == "probe":
@@ -188,55 +197,58 @@ if exists:
 # ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 exists = os.path.isfile(sys.argv[2]+".kismet.csv")
-if exists:
-    with open(sys.argv[2]+".kismet.csv") as csv_file:
-        csv_reader = csv.reader(csv_file, delimiter=';')
-        line_count = 0
-        for row in csv_reader:
-            if len(row) > 0 and row[0] != "Network":
-                try:
-                    cursor.execute('''INSERT INTO AP VALUES(?,?,?,?,?,?,?,?,?,?)''', (
-                        row[3], row[2], '', row[5], 0, '', row[7], row[16], 0, 0))  # manuf y carrier implementar
-                except sqlite3.IntegrityError:
-                    print('Record already exists')
+try:
+	if exists:
+	    with open(sys.argv[2]+".kismet.csv") as csv_file:
+	        csv_reader = csv.reader(csv_file, delimiter=';')
+        	line_count = 0
+	        for row in csv_reader:
+	            if len(row) > 0 and row[0] != "Network":
+	                try:
+	                    cursor.execute('''INSERT INTO AP VALUES(?,?,?,?,?,?,?,?,?,?)''', (
+	                        row[3], row[2], '', row[5], 0, '', row[7], row[16], 0, 0))  # manuf y carrier implementar
+	                except sqlite3.IntegrityError:
+	                    print('Record already exists')
+	db.commit()
+except:
+	print("Error in kismet.csv")
 
-db.commit()
-
-exists = os.path.isfile(sys.argv[2]+".csv")
-if exists:
-    with open(sys.argv[2]+".csv") as csv_file:
-        csv_reader = csv.reader(csv_file, delimiter=',')
-        line_count = 0
-        client = False
-        for row in csv_reader:
-            if len(row) > 0 and row[0] == "Station MAC":
-                client = True
-            elif len(row) > 0 and client:
-                try:
-                    cursor.execute('''INSERT INTO client VALUES(?,?,?,?,?,?)''',
-                                (row[0], '', 'Unknown', 'W', row[4], 'Misc'))  # manuf implementar
-                except sqlite3.IntegrityError:
-                    print('Record already exists')
-
-                if row[5] != " (not associated) ":
-                    try:
-                        cursor.execute(
-                            '''INSERT INTO connected VALUES(?,?)''', (row[5],  row[0]))
-                    except sqlite3.IntegrityError:
-                        print('Record already exists')
-
-                contador = 6
-                while contador < len(row) and row[contador] != "":
-                    try:
-                        cursor.execute(
-                            '''INSERT INTO Probe VALUES(?,?,?)''', (row[0],  row[contador], 0))
-                    except sqlite3.IntegrityError:
-                        print('Record already exists')
-                    contador += 1
-
-
-db.commit()
-
+try:
+	exists = os.path.isfile(sys.argv[2]+".csv")
+	if exists:
+	    with open(sys.argv[2]+".csv") as csv_file:
+	        csv_reader = csv.reader(csv_file, delimiter=',')
+	        line_count = 0
+	        client = False
+	        for row in csv_reader:
+	            if len(row) > 0 and row[0] == "Station MAC":
+	                client = True
+	            elif len(row) > 0 and client:
+	                print(row[0])
+	                try:
+	                    cursor.execute('''INSERT INTO client VALUES(?,?,?,?,?,?)''',
+	                                (row[0], '', 'Unknown', 'W', row[4], 'Misc'))  # manuf implementar
+	                except sqlite3.IntegrityError:
+	                    print('Record already exists')
+	
+	                if row[5] != " (not associated) ":
+	                    try:
+	                        cursor.execute(
+	                            '''INSERT INTO connected VALUES(?,?)''', (row[5],  row[0]))
+	                    except sqlite3.IntegrityError:
+	                        print('Record already exists')
+	
+	                contador = 6
+	                while contador < len(row) and row[contador] != "":
+	                    try:
+	                        cursor.execute(
+	                            '''INSERT INTO Probe VALUES(?,?,?)''', (row[0],  row[contador], 0))
+	                    except sqlite3.IntegrityError:
+	                        print('Record already exists')
+	                    contador += 1
+	db.commit()
+except:
+        print("Error in .csv")
 
 exists = os.path.isfile(sys.argv[2]+".log.csv")
 if exists:
