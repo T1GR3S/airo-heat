@@ -1,17 +1,17 @@
 # -*- coding: utf-8 -*-
 import csv
-import xml.etree.ElementTree
+import xml.etree.ElementTree as ET
 import sqlite3
 import sys
 from lxml import etree
 import os
-
+import ftfy
 #test fix xml error
 import codecs
 
 
-reload(sys)
-sys.setdefaultencoding('utf8')
+#reload(sys)
+#sys.setdefaultencoding('utf8')
 
 if len(sys.argv) > 1:
     if sys.argv[1] == "-h" or sys.argv[1] == "--help":
@@ -117,11 +117,20 @@ except sqlite3.IntegrityError:
 # ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
+with open(sys.argv[2]+".kismet.netxml", 'r') as file :
+  filedata = file.read()
+
+# Replace the target string
+filedata = filedata.replace('&#x  ', '&#x') #fix aircrack error, remove spaces
+
+
 exists = os.path.isfile(sys.argv[2]+".kismet.netxml")
 if exists:
-    doc = etree.parse(sys.argv[2]+".kismet.netxml")
+    with open(sys.argv[2]+".kismet.netxml", 'r') as file :
+        filedata = file.read()
+    filedata = filedata.replace('&#x  ', '&#x') #fix aircrack error, remove spaces
 
-    raiz = doc.getroot()
+    raiz = ET.fromstring(filedata)
     for wireless in raiz:
         if wireless.get("type") == "probe":
             bssid = wireless.find("BSSID").text
@@ -148,6 +157,10 @@ if exists:
         elif wireless.get("type") == "infrastructure":
             # ap
             essid = wireless.find("SSID").find("essid").text
+            if essid is not None:
+                essid=ftfy.fix_text(essid)
+                print(essid)
+
             bssid = wireless.find("BSSID").text
             manuf = wireless.find("manuf").text
             channel = wireless.find("channel").text
@@ -165,7 +178,7 @@ if exists:
                 cursor.execute('''INSERT INTO AP VALUES(?,?,?,?,?,?,?,?,?,?)''', (bssid,
                                                                                 essid, manuf, channel, freqmhz, carrier, encryption, packetsT, 0, 0))
             except sqlite3.IntegrityError:
-                print('Record already exists')
+                pass #print('Record already exists')
             #print bssid, essid, manuf, channel,freqmhz, carrier, encryption, packetsT
 
             # client
@@ -179,14 +192,14 @@ if exists:
                     cursor.execute('''INSERT INTO client VALUES(?,?,?,?,?,?)''',
                                 (clientMac, '', manuf, 'W', packetsT, 'Misc'))
                 except sqlite3.IntegrityError:
-                    print('Record already exists')
+                    pass #print('Record already exists')
                 # connected
-                print bssid, clientMac
+                print (bssid, clientMac)
                 try:
                     cursor.execute(
                         '''INSERT INTO connected VALUES(?,?)''', (bssid,  clientMac))
                 except sqlite3.IntegrityError:
-                    print('Record already exists')
+                    pass #print('Record already exists')
 
     # client ./
     # ap ./
@@ -208,7 +221,7 @@ try:
 	                    cursor.execute('''INSERT INTO AP VALUES(?,?,?,?,?,?,?,?,?,?)''', (
 	                        row[3], row[2], '', row[5], 0, '', row[7], row[16], 0, 0))  # manuf y carrier implementar
 	                except sqlite3.IntegrityError:
-	                    print('Record already exists')
+	                    pass #print('Record already exists')
 	db.commit()
 except:
 	print("Error in kismet.csv")
@@ -229,7 +242,7 @@ try:
 	                    cursor.execute('''INSERT INTO client VALUES(?,?,?,?,?,?)''',
 	                                (row[0], '', 'Unknown', 'W', row[4], 'Misc'))  # manuf implementar
 	                except sqlite3.IntegrityError:
-	                    print('Record already exists')
+	                    pass #print('Record already exists')
 	
 	                if row[5] != " (not associated) ":
 	                    try:
@@ -244,7 +257,7 @@ try:
 	                        cursor.execute(
 	                            '''INSERT INTO Probe VALUES(?,?,?)''', (row[0],  row[contador], 0))
 	                    except sqlite3.IntegrityError:
-	                        print('Record already exists')
+	                        pass #print('Record already exists')
 	                    contador += 1
 	db.commit()
 except:
@@ -262,14 +275,14 @@ if exists:
                         cursor.execute('''INSERT INTO client VALUES(?,?,?,?,?,?)''',
                                     (row[3], '', 'Unknown', 'W', -1, 'Misc'))
                     except sqlite3.IntegrityError:
-                        print('Record already exists')
+                        pass #print('Record already exists')
 
                     try:
                         if row[6] != 0.0:
                             cursor.execute('''INSERT INTO SeenClient VALUES(?,?,?,?,?,?,?)''',
                                     (row[3], row[0], 'aircrack-ng', row[4], row[6], row[7], '0.0'))
                     except sqlite3.IntegrityError:
-                        print('Record already exists')
+                        pass #print('Record already exists')
 
                 if len(row)>=10 and row[10] == "AP":
 
@@ -277,12 +290,12 @@ if exists:
                         cursor.execute('''INSERT INTO AP VALUES(?,?,?,?,?,?,?,?,?,?)''', (
                             row[3], row[2], '', 0, 0, '', '', 0, 0, 0))  # manuf y carrier implementar
                     except sqlite3.IntegrityError:
-                        print('Record already exists')
+                        pass #print('Record already exists')
 
                     try:
                         if row[6] != 0.0:
                             cursor.execute('''INSERT INTO SeenAp VALUES(?,?,?,?,?,?,?,?)''', (row[3], row[0], 'aircrack-ng', row[4], row[6], row[7], '0.0', 0))
                     except sqlite3.IntegrityError:
-                        print('Record already exists')
+                        pass #print('Record already exists')
 
 db.commit()
