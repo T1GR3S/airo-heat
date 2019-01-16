@@ -54,10 +54,12 @@
       // parameter when you first load the API. For example:
       // <script src="https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY&libraries=visualization">
 
+          console.log(row);
       var row = <%- JSON.stringify(row) %>;
-          //console.log(row);
+
           var addressPoints = [];
           for(var i in row)
+            //console.log(Object.values(row[i]));
             addressPoints.push(Object.values(row[i]));
 
           var totalPoints = addressPoints.length;
@@ -67,6 +69,7 @@
           var map, heatmap;
 
           function initMap() {
+
 
             var heatMapData = [];
 
@@ -96,6 +99,7 @@
                   peso = 100;
                 }
 
+
                 heatMapData.push({location: new google.maps.LatLng(addressPoints[i][0], addressPoints[i][1]), weight: peso})
               }
 
@@ -106,7 +110,7 @@
 
       map = new google.maps.Map(document.getElementById('map'), {
         zoom: 17,
-        center: {lat: addressPoints[3][0], lng: addressPoints[3][1]},
+        center: {lat: addressPoints[1][0], lng: addressPoints[1][1]},
         mapTypeId: 'satellite'
       });
 

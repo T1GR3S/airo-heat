@@ -135,7 +135,8 @@ cursor.execute('''
 ''')
 
 #Table SeenAP
-cursor. execute(''' INSERT INTO SeenAp
+cursor. execute(''' 
+    INSERT INTO SeenAp
     WITH clean_location AS (
         SELECT * 
         FROM inputDB.location 

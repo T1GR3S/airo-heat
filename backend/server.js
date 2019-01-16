@@ -72,16 +72,21 @@ app.get('/select_heatmap_mac', function(req, res){
     res.render('html/select_heatmap_mac.html');
 });
 
+
 app.post('/heatmap_name', function(req, res){
     var networkName = req.body.ap_name || '';
-    db.all("SELECT lat,lon,MAX(signal_rssi) FROM SeenAP where essid='"+networkName+"' GROUP BY lat,lon", function(err, row){
+    query_heatmap_name = "SELECT lat,lon,MAX(signal_rssi) FROM SeenAP where bssid  = (SELECT bssid from AP where ssid='"+networkName+"'  )  GROUP BY lat,lon";
+    db.all(query_heatmap_name, function(err, row){
+        console.log(row);
         res.render('heatmap/prueba.html', {row:row});
     });
 });
 
 app.post('/heatmap_mac', function(req, res){
     var networkMAC= req.body.ap_mac || '';
-    db.all("SELECT lat,lon,MAX(signal_rssi) FROM SeenAP where bssid='"+networkMAC+"' GROUP BY lat,lon", function(err, row){
+    query_heatmap_mac = "SELECT lat,lon,MAX(signal_rssi) FROM SeenAP where bssid = '"+networkName+"' GROUP BY lat,lon";
+    db.all(query_heatmap_mac, function(err, row){
+        console.log(row);
         res.render('heatmap/prueba.html', {row:row});
     });
 });
