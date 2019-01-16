@@ -3,11 +3,12 @@
 var config = require('./config');
 var sqlite3 = require('sqlite3').verbose();
 var db = new sqlite3.Database(config.web.db);
-var bodyParser = require('body-parser');
 var express = require('express');
+var bodyParser = require('body-parser');
 var app = express();
 
 app.use(express.static(__dirname + '/'));
+app.use(bodyParser.urlencoded({ extend: true }));
 app.engine('html', require('ejs').renderFile);
 app.set('view engine', 'html');
 app.set('views', __dirname);
@@ -21,10 +22,10 @@ app.get('/data', function(req, res){
 /// BORRAR
 app.get('/data2', function(req, res){
     db.all("SELECT lat,lon,signal_rssi FROM SeenAP where essid=' Cybercamp2018'", function(err, row){
-        //console.log(row);
         res.render('heatmap/prueba.html', {row:row});
     });
 });
+
 
 app.get('/select_clients', function(req, res){
     db.all("SELECT distinct essid from SeenAP", function(err, row){
@@ -41,7 +42,7 @@ app.post('/table_clients', function(req, res){
 
 //APs filtered by ESSID
 app.post('/table_ap', function(req, res){
-	var networkName = req.body.ap_name || '';
+    var networkName = req.body.ap_name || '';
     db.all("SELECT essid, bssid, MAX(signal_rssi) 'Max RSSI', MIN(signal_rssi) 'Min RSSI', CAST(round(AVG(signal_rssi)) as int) 'Average RSSI' FROM SeenAP where essid='"+networkName+"' GROUP BY bssid", function(err, row){
         res.render('html/table_ap.html', {row:row, name:networkName});
     });
@@ -49,7 +50,7 @@ app.post('/table_ap', function(req, res){
 
 //APs filtered by BSSID
 app.post('/table_ap_mac', function(req, res){
-	var networkMAC= req.body.ap_mac || '';
+    var networkMAC= req.body.ap_mac || '';
     db.all("SELECT essid, bssid, MAX(signal_rssi) 'Max RSSI', MIN(signal_rssi) 'Min RSSI', CAST(round(AVG(signal_rssi)) as int) 'Average RSSI' FROM SeenAP where bssid='"+networkMAC+"' GROUP BY bssid", function(err, row){
         res.render('html/table_ap.html', {row:row, name:networkMAC});
     });
@@ -72,14 +73,14 @@ app.get('/select_heatmap_mac', function(req, res){
 });
 
 app.post('/heatmap_name', function(req, res){
-	var networkName = req.body.ap_name || '';
+    var networkName = req.body.ap_name || '';
     db.all("SELECT lat,lon,MAX(signal_rssi) FROM SeenAP where essid='"+networkName+"' GROUP BY lat,lon", function(err, row){
         res.render('heatmap/prueba.html', {row:row});
     });
 });
 
 app.post('/heatmap_mac', function(req, res){
-	var networkMAC= req.body.ap_mac || '';
+    var networkMAC= req.body.ap_mac || '';
     db.all("SELECT lat,lon,MAX(signal_rssi) FROM SeenAP where bssid='"+networkMAC+"' GROUP BY lat,lon", function(err, row){
         res.render('heatmap/prueba.html', {row:row});
     });
