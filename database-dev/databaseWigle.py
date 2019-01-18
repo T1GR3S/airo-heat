@@ -1,5 +1,6 @@
 import sqlite3
 import sys
+import datetime
 
 if len(sys.argv) > 1:
     if sys.argv[1] == "-h" or sys.argv[1] =="--help":
@@ -144,7 +145,7 @@ cursor. execute('''
             SELECT bssid, time FROM inputDB.location GROUP BY bssid, time HAVING COUNT(*) = 1 
             )
     ) 
-    SELECT bssid, time/1000, 'wigle' as tool, level as signal_rssi, lat, lon, altitude as alt, '' as bsstimestamp 
+    SELECT bssid, datetime(time/1000, 'unixepoch'), 'wigle' as tool, level as signal_rssi, lat, lon, altitude as alt, '' as bsstimestamp 
     FROM clean_location 
     WHERE time!= 0 AND bssid IN (
         SELECT bssid from inputDB.network where type="W"
@@ -167,7 +168,7 @@ cursor. execute(''' INSERT INTO SeenClient
             SELECT bssid, time FROM inputDB.location GROUP BY bssid, time HAVING COUNT(*) = 1 
             )
     ) 
-    SELECT bssid as mac, time/1000, 'wigle' as tool, level as signal_rssi, lat, lon, altitude as alt 
+    SELECT bssid as mac, datetime(time/1000, 'unixepoch'), 'wigle' as tool, level as signal_rssi, lat, lon, altitude as alt 
     FROM clean_location 
     WHERE time!= 0 AND bssid IN (
         SELECT bssid from inputDB.network where type="B" OR type = "E"

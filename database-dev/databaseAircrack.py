@@ -160,7 +160,8 @@ if exists:
             if essid is not None:
                 essid=ftfy.fix_text(essid)
                 print(essid)
-
+            else:
+                essid=""
             bssid = wireless.find("BSSID").text
             manuf = wireless.find("manuf").text
             channel = wireless.find("channel").text
