@@ -117,13 +117,6 @@ except sqlite3.IntegrityError:
 # ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
-with open(sys.argv[2]+".kismet.netxml", 'r') as file :
-  filedata = file.read()
-
-# Replace the target string
-filedata = filedata.replace('&#x  ', '&#x') #fix aircrack error, remove spaces
-
-
 exists = os.path.isfile(sys.argv[2]+".kismet.netxml")
 if exists:
     with open(sys.argv[2]+".kismet.netxml", 'r') as file :
@@ -165,7 +158,7 @@ if exists:
             bssid = wireless.find("BSSID").text
             manuf = wireless.find("manuf").text
             channel = wireless.find("channel").text
-            freqmhz = wireless.find("freqmhz").text
+            freqmhz = wireless.find("freqmhz").text.text.split()[0]
             carrier = wireless.find("carrier").text
             manuf = wireless.find("manuf").text
             if wireless.find("SSID").find("encryption") != None:
