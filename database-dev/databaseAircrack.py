@@ -158,7 +158,7 @@ if exists:
             bssid = wireless.find("BSSID").text
             manuf = wireless.find("manuf").text
             channel = wireless.find("channel").text
-            freqmhz = wireless.find("freqmhz").text.text.split()[0]
+            freqmhz = wireless.find("freqmhz").text.split()[0]
             carrier = wireless.find("carrier").text
             manuf = wireless.find("manuf").text
             if wireless.find("SSID").find("encryption") != None:
